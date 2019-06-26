@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/transparent"
+              android:orientation="horizontal" android:id="@+id/music_control">
+    <ImageView
+            android:layout_width="65dp"
+            android:layout_height="65dp" app:srcCompat="@drawable/albumcover" android:id="@+id/ctl_cover"
+            android:layout_weight="0" android:padding="5dp"/>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="65dp" android:layout_weight="1" android:id="@+id/music_control_two">
+        <Space
+                android:layout_width="65dp"
+                android:layout_height="65dp"/>
+        <TextView
+                android:text="Gossip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/ctr_name" android:layout_weight="1"
+                android:layout_gravity="center_vertical" android:padding="15dp" android:textSize="16sp"
+                tools:visibility="visible" android:visibility="visible"/>
+        <ImageView
+                android:layout_width="50dp"
+                android:layout_height="65dp" app:srcCompat="@drawable/play" android:id="@+id/ctl_play"
+                android:layout_weight="0" android:scaleType="fitCenter" android:padding="15dp"
+                tools:visibility="visible"
+                android:visibility="visible"/>
+        <ImageView
+                android:layout_width="55dp"
+                android:layout_height="65dp" app:srcCompat="@drawable/play_next" android:id="@+id/ctl_next"
+                android:layout_weight="0" android:scaleType="fitCenter" android:padding="15dp"
+                tools:visibility="visible"
+                android:visibility="visible"/>
+    </LinearLayout>
+
+</FrameLayout>

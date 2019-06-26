@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="SlidingPanelHeight">65dp</dimen>
+    <dimen name="sp_img_scale">290dp</dimen>
+    <dimen name="sp_img_stop">210dp</dimen>
+    <dimen name="sp_artist">18sp</dimen>
+    <dimen name="sp_album">18sp</dimen>
+    <dimen name="sp_song">16sp</dimen>
+</resources>
