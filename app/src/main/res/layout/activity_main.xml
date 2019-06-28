@@ -20,35 +20,42 @@
             app:umanoParallaxOffset="100dp"
             app:umanoShadowHeight="2dp">
 
-            <!-- MAIN CONTENT -->
+        <!-- MAIN CONTENT -->
 
-        <FrameLayout
-                    android:id="@+id/frag_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    >        <androidx.appcompat.widget.Toolbar
+        <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?attr/colorPrimary"
-                android:theme="?attr/actionBarTheme"
-                android:minHeight="?attr/actionBarSize" android:id="@+id/main_toolbar"/>
-            </FrameLayout>
-
-            <!-- SLIDING LAYOUT -->
-            <LinearLayout
-                    android:id="@+id/dragView"
+                android:layout_height="match_parent">
+            <androidx.appcompat.widget.Toolbar
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="#ffffff"
-                    android:clickable="true"
-                    android:focusable="false"
-                    android:orientation="vertical">
+                    android:layout_height="35dp"
+                    android:background="@color/white"
+                    android:theme="?attr/actionBarTheme"
+                    android:minHeight="?attr/actionBarSize" android:id="@+id/main_toolbar"/>
+            <FrameLayout
+                        android:id="@+id/frag_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
 
-                <include layout="@layout/music_control"/>
-                <include layout="@layout/music_playing"/>
+                </FrameLayout>
+        </LinearLayout>
 
-            </LinearLayout>
-        </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+        <!-- SLIDING LAYOUT -->
+        <LinearLayout
+                android:id="@+id/dragView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#ffffff"
+                android:clickable="true"
+                android:focusable="false"
+                android:orientation="vertical">
+
+            <include layout="@layout/music_control"/>
+            <include layout="@layout/music_playing"/>
+
+        </LinearLayout>
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/BtmNavView"

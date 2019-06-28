@@ -1,4 +1,6 @@
 package com.example.allmysound
+import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -13,20 +15,156 @@ import kotlinx.android.synthetic.main.music_control.*
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.appcompat.widget.Toolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.android.synthetic.main.music_playing.*
+import android.view.ViewGroup
+import androidx.core.net.toUri
+import androidx.fragment.app.Fragment
+import com.eightbitlab.supportrenderscriptblur.SupportRenderScriptBlur
+import com.gun0912.tedpermission.PermissionListener
+import com.gun0912.tedpermission.TedPermission
+import com.squareup.picasso.Picasso
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity(),MainContract.View{
+    companion object {
+        @SuppressLint("StaticFieldLeak")
+        lateinit var prefs: MySharedPreference
 
-    private  var presenter: MainPresenter= MainPresenter()
+        var presenter: MainPresenter= MainPresenter()
+        fun createMainPresenter() : MainPresenter = this.presenter
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        blurry()
+        prefs = MySharedPreference(this)
+        Permission()
+        presenterSetting()
         setToolbar(main_toolbar)
         connectFragments(BtmNavView)
+        textviewScrolling()
+        settingClickListners()
+    }
+
+    fun settingClickListners(){
+        dragView.setOnClickListener { }
+        ctr_play.setOnClickListener { presenter.playBtnClicked() }
+        ctr_next.setOnClickListener { showToast("ctl_next") }
+        music_control.setOnLongClickListener { showToast("music_control");true }
+        ctr_cover_cv.setOnClickListener { showToast("ctr_cover") }
+        song_album.setOnClickListener { showToast("song_album") }
+        more.setOnClickListener { presenter.moreBtnClicked() }
+        play_pre.setOnClickListener { showToast("play_pre") }
+        play.setOnClickListener { presenter.playBtnClicked()}
+        play_next.setOnClickListener { showToast("play_next") }
+        shuffle.setOnClickListener {presenter.shuffleBtnClicked()}
+        like.setOnClickListener { presenter.likeBtnClicked() }
+        rotate.setOnClickListener { presenter.rotateBtnClicked() }
+    }
+
+    fun textviewScrolling(){
+        ctr_name.isSelected =true
+        song_title_.isSelected =true
+        song_album.isSelected =true
+    }
+
+    fun presenterSetting(){
         presenter.setView(this)
         presenter.slidingPanelLayoutListener(sliding_layout)
+        presenter.loadData()
+        presenter.loadSetting()
+    }
+    fun Permission(){
+        val permissionlistener = object : PermissionListener {
+            override fun onPermissionGranted() {
+                Log.e("Songlist_Permission", "Permission Granted")
+            }
+
+            override fun onPermissionDenied(deniedPermissions: List<String>) {
+                Log.e("Songlist_Permission", "Permission Denied$deniedPermissions")
+                this@MainActivity.finish()
+            }
+        }
+        TedPermission.with(this)
+            .setPermissionListener(permissionlistener)
+            .setDeniedMessage("퍼미션 거부시 ,서비스를 이용 할 수 없습니다\n\n설정에서 퍼미션을 승인하세요 ")
+            .setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
+            .check()
+    }
+
+    fun blurry(){
+        val radius = 25f
+        val decorView = window.decorView
+        //ViewGroup you want to start blur from. Choose root as close to BlurView in hierarchy as possible.
+        val rootView = decorView.findViewById(android.R.id.content) as ViewGroup
+        //set background, if your root layout doesn't have one
+        val windowBackground = decorView.background
+
+        blurryView.setupWith(rootView)
+            .windowBackground(windowBackground)
+            .blurAlgorithm(SupportRenderScriptBlur(this))
+            .blurRadius(radius)
+            .setHasFixedTransformationMatrix(true)
+    }
+
+    override fun setSongTitle(text:String) {
+        ctr_name.text = text
+    }
+    override fun setSongInnerTitle(text:String) {
+        song_title_.text = text
+    }
+    override fun setSongAlbum(text:String) {
+        song_album.text = text
+    }
+    @SuppressLint("SetTextI18n")
+    override fun setSongTime(text:String) {
+        val timeLong = text.toLong()
+        val min = TimeUnit.MILLISECONDS.toMinutes(timeLong)
+        val sec = TimeUnit.MILLISECONDS.toSeconds(timeLong) - min*60
+        val secStr = if (sec<10)  "0$sec" else  "$sec"
+        remain_time.text = "$min:$secStr"
+    }
+    override fun setSongAlbumArt(uri: String){
+        Picasso.get()
+            .load(uri.toUri())
+            .error(R.drawable.song_500)
+            .into(ctr_cover)
+    }
+
+    override fun showMoreBtn() {
+//        showToast("more")
+    }
+    override fun changePlayBtn(isPlay:Boolean){
+        if (isPlay){
+            play.setImageResource(R.drawable.pause)
+            ctr_play.setImageResource(R.drawable.pause)
+        }else{
+            play.setImageResource(R.drawable.play)
+            ctr_play.setImageResource(R.drawable.play)
+        }
+
+    }
+    override fun changeRotateBtn(isRotate:Boolean){
+        if (isRotate)
+            rotate.setImageResource(R.drawable.rotate_all)
+        else
+            rotate.setImageResource(R.drawable.rotate_one)
+    }
+    override fun changeShuffleBtn(isShuffle:Boolean){
+        if (isShuffle)
+            shuffle.setImageResource(R.drawable.shuffle)
+        else
+            shuffle.setImageResource(R.drawable.unshuffle)
+    }
+
+    override fun changeLikeBtn(isLike:Boolean){
+        if (isLike)
+            like.setImageResource(R.drawable.like)
+        else
+            like.setImageResource(R.drawable.unlike)
     }
 
     override fun showToast(message: String) {
@@ -34,7 +172,7 @@ class MainActivity : AppCompatActivity(),MainContract.View{
     }
     override fun connectFragments(view : BottomNavigationView){
         view.setOnNavigationItemSelectedListener {
-            var selectedFrag : androidx.fragment.app.Fragment? =null
+            var selectedFrag : Fragment? =null
             when(it.itemId){
                 R.id.menu_Music -> selectedFrag = MusicFrag()
                 R.id.menu_Recommended -> selectedFrag = RecommendFrag()
@@ -49,7 +187,7 @@ class MainActivity : AppCompatActivity(),MainContract.View{
         setSupportActionBar(toolbar)
         val actionbar = supportActionBar
         actionbar!!.title = ""
-        actionbar!!.setDisplayShowHomeEnabled(true)
+        actionbar.setDisplayShowHomeEnabled(true)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -80,7 +218,6 @@ class MainActivity : AppCompatActivity(),MainContract.View{
     override fun setBNVHeight(distance:Float){
         val originalHeight = 196
         val height= (originalHeight.toFloat())-( (originalHeight.toFloat())*((10000.0f-distance*10000.0f)/10000.0f) )
-        Log.e("setBNVHeight","setBNVHeight : $height")
         BtmNavView.animate()
             .translationY(height)
             .duration=0
@@ -89,7 +226,6 @@ class MainActivity : AppCompatActivity(),MainContract.View{
         val originalHeight = 196
         BtmNavView.requestLayout()
         BtmNavView.layoutParams.height =  ( (originalHeight.toFloat())*((10000.0f-distance*10000.0f)/10000.0f) ).toInt()
-        Log.e("setBNVSize","setBNVSize : ${BtmNavView.height}")
     }
     override fun setControllerAlpha(distance:Float){
         val alphaValue = (10000.0f-distance*40000.0f)
@@ -98,13 +234,14 @@ class MainActivity : AppCompatActivity(),MainContract.View{
             .duration = 0
     }
     override fun setImageSize(distance:Float){
-        val originalHeight = 228
-        val marginParams = ctl_cover.layoutParams as MarginLayoutParams
-        ctl_cover.requestLayout()
-        ctl_cover.layoutParams.height = ((distance*800.0f).toInt()+originalHeight)
-        ctl_cover.layoutParams.width = ((distance*800.0f).toInt()+originalHeight)
+//        Log.e("ctr_cover_cv.layoutParams.height ","${ctr_cover_cv.layoutParams.height}")
+        val originalHeight = 210
+        val marginParams = ctr_cover_cv.layoutParams as MarginLayoutParams
+        ctr_cover_cv.requestLayout()
+        ctr_cover_cv.layoutParams.height = ((distance*820.0f).toInt()+originalHeight)
+        ctr_cover_cv.layoutParams.width = ((distance*820.0f).toInt()+originalHeight)
         marginParams.setMargins(
-            (distance*200.0f).toInt(),(distance*220.0f).toInt(),
-            (distance*220.0f).toInt(),(distance*220.0f).toInt()  )
+            (distance*180.0f).toInt(),(distance*200.0f).toInt(),
+            (distance*180.0f).toInt(),(distance*130.0f).toInt()  )
     }
 }
