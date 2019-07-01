@@ -241,7 +241,7 @@ class MainActivity : AppCompatActivity(),MainContract.View{
         ctr_cover_cv.layoutParams.height = ((distance*820.0f).toInt()+originalHeight)
         ctr_cover_cv.layoutParams.width = ((distance*820.0f).toInt()+originalHeight)
         marginParams.setMargins(
-            (distance*180.0f).toInt(),(distance*200.0f).toInt(),
-            (distance*180.0f).toInt(),(distance*130.0f).toInt()  )
+            (distance*180.0f).toInt(),(distance*140.0f).toInt(),
+            (distance*180.0f).toInt(),(distance*75.0f).toInt()  )
     }
 }
