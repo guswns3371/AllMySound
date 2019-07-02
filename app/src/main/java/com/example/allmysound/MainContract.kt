@@ -1,13 +1,10 @@
 package com.example.allmysound
 
-import android.graphics.Bitmap
-import android.net.Uri
-import android.view.View
+import android.widget.SeekBar
 import androidx.appcompat.widget.Toolbar
 import com.example.allmysound.Base.BaseContract
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
-import java.net.URI
 
 interface MainContract {
     interface View:BaseContract.View{
@@ -26,10 +23,17 @@ interface MainContract {
         fun setSongTime(text:String)
         fun setSongAlbumArt(uri: String)
 
+        fun setPastTimeText(text: String)
+
         fun changePlayBtn(isPlay:Boolean)
         fun changeRotateBtn(isRotate:Boolean)
         fun changeShuffleBtn(isShuffle:Boolean)
         fun changeLikeBtn(isLike:Boolean)
+
+        fun setMusicSeekBarListener(listener : SeekBar.OnSeekBarChangeListener)
+        fun setMusicSeekBarMax(max : Int)
+        fun setMusicSeekBarProgress(progress: Int)
+        fun updateMusicSeekBarNTime()
 
     }
     interface Presenter:BaseContract.Presenter<View>{
@@ -37,9 +41,11 @@ interface MainContract {
         override fun releaseView()
 
         fun linkData(songInfo: SongInfo)
-        fun setData()
         fun loadData()
         fun loadSetting()
+        fun saveData()
+        fun getMusicSeekBarNTime()
+        fun MusicSeekBarListener() : SeekBar.OnSeekBarChangeListener
         fun onSlideListener(): SlidingUpPanelLayout.PanelSlideListener
         fun slidingPanelLayoutListener(slidingLayout:SlidingUpPanelLayout)
 

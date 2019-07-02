@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
                                                    xmlns:app="http://schemas.android.com/apk/res-auto"
                                                    xmlns:tools="http://schemas.android.com/tools"
@@ -8,5 +8,22 @@
                                                    android:layout_height="match_parent">
     <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
-            android:layout_height="match_parent" android:id="@+id/songlist_RV"/>
-</LinearLayout>
+            android:layout_height="match_parent" android:id="@+id/songlist_RV"
+            android:paddingBottom="@dimen/SlidingPanelHeight"
+    />
+    <com.reddit.indicatorfastscroll.FastScrollerView
+            android:id="@+id/fastscroller"
+            android:layout_width="32dp"
+            android:layout_height="match_parent"
+            android:layout_alignEnd="@id/songlist_RV"
+            android:paddingTop="50dp" android:paddingBottom="50dp"/>
+    <com.reddit.indicatorfastscroll.FastScrollerThumbView
+            android:id="@+id/fastscroller_thumb"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/fastscroller"
+            android:layout_alignTop="@+id/fastscroller"
+            android:layout_marginEnd="16dp"
+            android:layout_toStartOf="@+id/fastscroller"
+    />
+</RelativeLayout>

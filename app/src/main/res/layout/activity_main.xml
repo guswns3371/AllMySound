@@ -15,7 +15,11 @@
             android:layout_height="match_parent"
             android:gravity="bottom"
             app:umanoDragView="@+id/dragView"
+
+            app:umanoFadeColor="@android:color/transparent"
+            app:umanoClipPanel="false"
             app:umanoOverlay="true"
+
             app:umanoPanelHeight="@dimen/SlidingPanelHeight"
             app:umanoParallaxOffset="100dp"
             app:umanoShadowHeight="2dp">

@@ -51,7 +51,7 @@ class SongListPresenter(private var context: Context?):SongListContract.Presente
             MediaStore.Audio.AudioColumns.DURATION
         )
         val selection = MediaStore.Audio.Media.IS_MUSIC +" != 0"
-        val orderBy = MediaStore.Audio.AudioColumns.DISPLAY_NAME + " ASC"
+        val orderBy = MediaStore.Audio.AudioColumns.TITLE + " ASC"
         val cursor =context!!.contentResolver.query(uri, projection, selection,null, orderBy)
 
         column_index_name = cursor!!.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DISPLAY_NAME)

@@ -1,8 +1,12 @@
 package com.example.allmysound
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
+import android.media.AudioManager
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
+import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -17,11 +21,13 @@ import androidx.appcompat.widget.Toolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.music_playing.*
 import android.view.ViewGroup
+import android.widget.SeekBar
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.eightbitlab.supportrenderscriptblur.SupportRenderScriptBlur
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
+import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.squareup.picasso.Picasso
 import java.util.concurrent.TimeUnit
 
@@ -45,15 +51,47 @@ class MainActivity : AppCompatActivity(),MainContract.View{
         presenterSetting()
         setToolbar(main_toolbar)
         connectFragments(BtmNavView)
+        initVolumeControl()
         textviewScrolling()
         settingClickListners()
     }
 
+    override fun setMusicSeekBarMax(max: Int) {
+        music_seekbar.max = max
+    }
+    override  fun setMusicSeekBarProgress(progress: Int){
+        music_seekbar.progress = progress
+    }
+    override fun setMusicSeekBarListener(listener : SeekBar.OnSeekBarChangeListener){
+        music_seekbar.setOnSeekBarChangeListener(listener)
+    }
+    override fun setPastTimeText(text: String) {
+        past_time.text = text
+    }
+    override fun updateMusicSeekBarNTime() {
+        Thread(object: Runnable {
+            override fun run() {
+                presenter.getMusicSeekBarNTime()
+                Handler().postDelayed(this,1000)
+            }
+        }).run()
+
+    }
+
     fun settingClickListners(){
-        dragView.setOnClickListener { }
+        dragView.setOnClickListener {
+            if (sliding_layout.panelState !=SlidingUpPanelLayout.PanelState.EXPANDED
+                && sliding_layout.panelState !=SlidingUpPanelLayout.PanelState.ANCHORED){
+                if (sliding_layout.anchorPoint < 1.0f)
+                    sliding_layout.panelState = SlidingUpPanelLayout.PanelState.ANCHORED
+                else
+                    sliding_layout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+            }
+        }
         ctr_play.setOnClickListener { presenter.playBtnClicked() }
         ctr_next.setOnClickListener { showToast("ctl_next") }
         music_control.setOnLongClickListener { showToast("music_control");true }
+        music_control.setOnClickListener { sliding_layout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED }
         ctr_cover_cv.setOnClickListener { showToast("ctr_cover") }
         song_album.setOnClickListener { showToast("song_album") }
         more.setOnClickListener { presenter.moreBtnClicked() }
@@ -64,18 +102,17 @@ class MainActivity : AppCompatActivity(),MainContract.View{
         like.setOnClickListener { presenter.likeBtnClicked() }
         rotate.setOnClickListener { presenter.rotateBtnClicked() }
     }
-
     fun textviewScrolling(){
         ctr_name.isSelected =true
         song_title_.isSelected =true
         song_album.isSelected =true
     }
-
     fun presenterSetting(){
         presenter.setView(this)
         presenter.slidingPanelLayoutListener(sliding_layout)
         presenter.loadData()
         presenter.loadSetting()
+
     }
     fun Permission(){
         val permissionlistener = object : PermissionListener {
@@ -85,7 +122,6 @@ class MainActivity : AppCompatActivity(),MainContract.View{
 
             override fun onPermissionDenied(deniedPermissions: List<String>) {
                 Log.e("Songlist_Permission", "Permission Denied$deniedPermissions")
-                this@MainActivity.finish()
             }
         }
         TedPermission.with(this)
@@ -94,7 +130,6 @@ class MainActivity : AppCompatActivity(),MainContract.View{
             .setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
             .check()
     }
-
     fun blurry(){
         val radius = 25f
         val decorView = window.decorView
@@ -108,6 +143,61 @@ class MainActivity : AppCompatActivity(),MainContract.View{
             .blurAlgorithm(SupportRenderScriptBlur(this))
             .blurRadius(radius)
             .setHasFixedTransformationMatrix(true)
+
+    }
+    fun initVolumeControl(){
+        val am : AudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        volume_seekbar.max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        volume_seekbar.progress = am.getStreamVolume(AudioManager.STREAM_MUSIC)
+        volume_seekbar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0)
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            }
+        } )
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean { // 볼륨버튼으로 seekbar 조절
+        val am : AudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val currentVolume  = volume_seekbar.progress
+        when (keyCode) {
+            KeyEvent.KEYCODE_VOLUME_UP -> {
+//                volume_seekbar.progress += 1
+                return true
+            }
+            KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                volume_seekbar.progress -=1
+                return true
+            }
+            KeyEvent.KEYCODE_BACK -> return true
+        }
+
+        return false
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        val am : AudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val currentVolume  = volume_seekbar.progress
+        when (keyCode) {
+            KeyEvent.KEYCODE_VOLUME_UP -> {
+                volume_seekbar.progress +=1
+                return true
+            }
+            KeyEvent.KEYCODE_VOLUME_DOWN -> {
+//                volume_seekbar.progress -=1
+                return true
+            }
+            KeyEvent.KEYCODE_BACK -> {
+                this.finish()
+                return true
+            }
+        }
+        return false
     }
 
     override fun setSongTitle(text:String) {
@@ -159,7 +249,6 @@ class MainActivity : AppCompatActivity(),MainContract.View{
         else
             shuffle.setImageResource(R.drawable.unshuffle)
     }
-
     override fun changeLikeBtn(isLike:Boolean){
         if (isLike)
             like.setImageResource(R.drawable.like)

@@ -96,4 +96,7 @@ dependencies {
     //blurry
     implementation 'com.eightbitlab:supportrenderscriptblur:1.0.2'
     implementation 'com.eightbitlab:blurview:1.4.0'
+
+    //fasterscroll
+    implementation 'com.reddit:indicator-fast-scroll:1.1.0'
 }
