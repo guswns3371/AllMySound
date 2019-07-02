@@ -69,10 +69,14 @@ class SongListFrag: Fragment(),SongListContract.View {
         songInfos = presenter.loadSong()
     }
     fun initRecyclerView(){
-        val myAdapter = SongListAdapter(activity!!,songInfos){
-            MainActivity.createMainPresenter().linkData(it)
-            MainActivity.createMainPresenter().checkIsPlaying()
+        val myAdapter = SongListAdapter(activity!!,songInfos)
+        myAdapter.mClickListener = object : SongListAdapter.SongListClickListener{
+            override fun onClick(pos: Int) {
+                MainActivity.createMainPresenter().linkDataIndex(pos)
+                MainActivity.createMainPresenter().checkIsPlaying()
+            }
         }
+        MainActivity.createMainPresenter().linkData(songInfos,myAdapter)
         mRecyclerView.adapter = myAdapter
         mRecyclerView.layoutManager=linearLayoutManager
         mRecyclerView.setHasFixedSize(true)
@@ -83,8 +87,10 @@ class SongListFrag: Fragment(),SongListContract.View {
             { position ->
                 val item = songInfos[position] // Get your model object
                 // or fetch the section at [position] from your database
+                val text = if(position%100==0 || position==0 || position == (songInfos.size-1)/2 || position == songInfos.size-1)
+                    item.title.substring(0, 1).toUpperCase() else "."
                 FastScrollItemIndicator.Text(
-                    item.title.substring(0, 1).toUpperCase() // Grab the first letter and capitalize it
+                    text // Grab the first letter and capitalize it
                 ) // Return a text indicator
             }
         )
@@ -99,9 +105,12 @@ class SongListFrag: Fragment(),SongListContract.View {
                 itemPosition: Int
             ) {
                 mRecyclerView.stopScroll()
-                smoothScroller.targetPosition = itemPosition
-                linearLayoutManager.startSmoothScroll(smoothScroller)
+//                smoothScroller.targetPosition = itemPosition
+//                linearLayoutManager.startSmoothScroll(smoothScroller)
+                linearLayoutManager.scrollToPosition(itemPosition)
             }
         }
     }
+
+
     }

@@ -3,6 +3,7 @@ package com.example.allmysound
 import android.widget.SeekBar
 import androidx.appcompat.widget.Toolbar
 import com.example.allmysound.Base.BaseContract
+import com.example.allmysound.Music.SongList.SongListAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 
@@ -40,7 +41,8 @@ interface MainContract {
         override fun setView(view: View)
         override fun releaseView()
 
-        fun linkData(songInfo: SongInfo)
+        fun linkData(songInfolist: ArrayList<SongInfo>,songListAdapter: SongListAdapter)
+        fun linkDataIndex(idx : Int)
         fun loadData()
         fun loadSetting()
         fun saveData()
@@ -52,8 +54,11 @@ interface MainContract {
         fun moreBtnClicked()
         fun checkIsPlaying()
         fun playBtnClicked()
+        fun nextBtnClicked()
+        fun prevBtnClicked()
         fun rotateBtnClicked()
         fun shuffleBtnClicked()
         fun likeBtnClicked()
+
     }
 }

@@ -4,7 +4,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:paddingStart="5dp" android:paddingEnd="15dp">
+        android:layout_height="wrap_content" android:paddingStart="5dp" android:paddingEnd="30dp">
     <androidx.cardview.widget.CardView
             android:background="@color/transparent"
             android:layout_marginStart="13dp"
@@ -13,7 +13,8 @@
             app:cardCornerRadius="7dp"
             android:layout_marginBottom="7dp"
             android:layout_width="55dp"
-            android:layout_height="55dp" app:cardMaxElevation="1dp" app:cardElevation="1dp">
+            android:layout_height="55dp" app:cardMaxElevation="1dp" app:cardElevation="1dp"
+            app:cardBackgroundColor="#ffffffff">
         <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">

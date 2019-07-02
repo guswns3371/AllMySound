@@ -16,10 +16,15 @@
             android:layout_width="32dp"
             android:layout_height="match_parent"
             android:layout_alignEnd="@id/songlist_RV"
-            android:paddingTop="50dp" android:paddingBottom="50dp"/>
+            app:iconColor="@color/grey"
+            android:paddingBottom="@dimen/SlidingPanelHeight"/>
     <com.reddit.indicatorfastscroll.FastScrollerThumbView
             android:id="@+id/fastscroller_thumb"
-            android:layout_width="40dp"
+            app:thumbColor="@color/black"
+            android:textAppearance="@color/white"
+            android:textColor="@color/white"
+            app:iconColor="@color/grey"
+            android:layout_width="50dp"
             android:layout_height="match_parent"
             android:layout_alignBottom="@+id/fastscroller"
             android:layout_alignTop="@+id/fastscroller"

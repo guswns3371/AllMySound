@@ -89,15 +89,15 @@ class MainActivity : AppCompatActivity(),MainContract.View{
             }
         }
         ctr_play.setOnClickListener { presenter.playBtnClicked() }
-        ctr_next.setOnClickListener { showToast("ctl_next") }
+        ctr_next.setOnClickListener {  presenter.nextBtnClicked() }
         music_control.setOnLongClickListener { showToast("music_control");true }
         music_control.setOnClickListener { sliding_layout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED }
         ctr_cover_cv.setOnClickListener { showToast("ctr_cover") }
         song_album.setOnClickListener { showToast("song_album") }
         more.setOnClickListener { presenter.moreBtnClicked() }
-        play_pre.setOnClickListener { showToast("play_pre") }
+        play_pre.setOnClickListener { presenter.prevBtnClicked() }
         play.setOnClickListener { presenter.playBtnClicked()}
-        play_next.setOnClickListener { showToast("play_next") }
+        play_next.setOnClickListener { presenter.nextBtnClicked()}
         shuffle.setOnClickListener {presenter.shuffleBtnClicked()}
         like.setOnClickListener { presenter.likeBtnClicked() }
         rotate.setOnClickListener { presenter.rotateBtnClicked() }
@@ -239,9 +239,9 @@ class MainActivity : AppCompatActivity(),MainContract.View{
     }
     override fun changeRotateBtn(isRotate:Boolean){
         if (isRotate)
-            rotate.setImageResource(R.drawable.rotate_all)
-        else
             rotate.setImageResource(R.drawable.rotate_one)
+        else
+            rotate.setImageResource(R.drawable.rotate_all)
     }
     override fun changeShuffleBtn(isShuffle:Boolean){
         if (isShuffle)

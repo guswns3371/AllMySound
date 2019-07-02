@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.net.toUri
 import com.bumptech.glide.Glide
+import com.bumptech.glide.Glide.init
 import com.bumptech.glide.request.RequestOptions
 import com.example.allmysound.MainActivity
 import com.example.allmysound.R
@@ -18,9 +19,14 @@ import kotlinx.android.synthetic.main.songlist_item.view.*
 
 class SongListAdapter (
     private val context: Context,
-    private val songlist: ArrayList<SongInfo>,
-    val itemClick : (SongInfo) -> Unit
+    private val songlist: ArrayList<SongInfo>
+//    , val itemClick : (song: SongInfo,idx: Int) -> Unit
 ): androidx.recyclerview.widget.RecyclerView.Adapter<SongListAdapter.MyViewHolder>()  {
+
+    interface SongListClickListener{
+        fun onClick(pos:Int)
+    }
+    var mClickListener: SongListClickListener? =null
 
     inner class MyViewHolder (itemView : View?) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView!!) {
         val songimg = itemView?.findViewById<ImageView>(R.id.song_img)
@@ -28,18 +34,18 @@ class SongListAdapter (
         val songname = itemView?.findViewById<TextView>(R.id.song_title)
         val playing_img = itemView?.findViewById<ImageView>(R.id.playing_now_img)
         @SuppressLint("ResourceAsColor")
-        fun bind(songlist: SongInfo, context: Context) {
+        fun bind(song: SongInfo, pos : Int,context: Context) {
 
             this.songimg?.let {
                 Glide.with(context)
-                    .load(songlist.img.toUri())
+                    .load(song.img.toUri())
                     .apply(RequestOptions().error(R.drawable.song_500))
                     .into(it)
             }
-            artistname?.text = songlist.artist
-            songname?.text = songlist.title
+            artistname?.text = song.artist
+            songname?.text = song.title
 
-            if (MainActivity.prefs.getIsPlayingInfo()?.idx == songlist.idx){
+            if (MainActivity.prefs.getIsPlayingInfo()?.idx == song.idx){
                 playing_img?.visibility = View.VISIBLE
                 songname?.typeface = Typeface.DEFAULT_BOLD
             } else{
@@ -47,11 +53,12 @@ class SongListAdapter (
                 songname?.typeface = Typeface.DEFAULT
             }
 
-
-            itemView.setOnClickListener{
-                itemClick(songlist)
-                it.playing_now_img.visibility = View.VISIBLE
-                notifyDataSetChanged()
+            if(mClickListener!=null){
+                itemView.setOnClickListener{
+                    mClickListener?.onClick(pos)
+                    it.playing_now_img.visibility = View.VISIBLE
+                    notifyDataSetChanged()
+                }
             }
         }
 
@@ -67,6 +74,6 @@ class SongListAdapter (
     }
 
     override fun onBindViewHolder(p0: MyViewHolder, p1: Int) {
-        p0.bind(songlist[p1],context)
+        p0.bind(songlist[p1],p1,context)
     }
 }

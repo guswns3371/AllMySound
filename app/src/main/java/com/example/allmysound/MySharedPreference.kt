@@ -6,7 +6,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 
-private const val PRE_FILENAME = "prefs"
+private const val PRE_FILENAME = "prefs_"
 private const val PLAY = "Play"
 private const val SHUFFLE = "Shuffle"
 private const val ROTATE = "Rotate"
@@ -18,6 +18,7 @@ class MySharedPreference(private var context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences(PRE_FILENAME, Context.MODE_PRIVATE)
     private val editor = prefs.edit()
     private val gson = GsonBuilder().create()
+    inline fun <reified T> Gson.fromJson(json: String) = this.fromJson<T>(json, object: TypeToken<T>() {}.type)
 
     fun setPlayBoolean(value : Boolean) {
         editor.putBoolean(PLAY,value).apply()
@@ -47,7 +48,6 @@ class MySharedPreference(private var context: Context) {
         val strSongInfo = gson.toJson(value)
         editor.putString(SONGINFO,strSongInfo).apply()
     }
-    inline fun <reified T> Gson.fromJson(json: String) = this.fromJson<T>(json, object: TypeToken<T>() {}.type)
     fun getIsPlayingInfo():SongInfo?{
         val str = prefs.getString(SONGINFO,null)
         return if (str == null) null else Gson().fromJson(str)

@@ -63,6 +63,7 @@ class SongListPresenter(private var context: Context?):SongListContract.Presente
         column_index_data_title=   cursor.getColumnIndexOrThrow( MediaStore.Audio.AudioColumns.TITLE)
         column_index_idx=   cursor.getColumnIndexOrThrow( MediaStore.Audio.AudioColumns._ID)
 
+        var num = 0
         while (cursor.moveToNext()){
             val idx = cursor.getString(column_index_idx)
             val artist = cursor.getString(column_index_data_artist)
@@ -81,7 +82,8 @@ class SongListPresenter(private var context: Context?):SongListContract.Presente
             }catch (e : IOException){
                 Log.e("Artwork Exception2","$e")
             }
-            listOfAllSongs.add(SongInfo(idx,imgUri.toString(),artist,title,album,time,path,filename))
+            listOfAllSongs.add(SongInfo(num,idx,imgUri.toString(),artist,title,album,time,path,filename))
+            num++
             //uri 를 저장해버리면 => json으로 변환시 uri 부분이 변환되지 않는다
         }
 

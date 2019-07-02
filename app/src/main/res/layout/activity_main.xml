@@ -26,10 +26,12 @@
 
         <!-- MAIN CONTENT -->
 
+
+        <!-- SLIDING LAYOUT -->
         <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent" android:id="@+id/mainView">
             <androidx.appcompat.widget.Toolbar
                     android:layout_width="match_parent"
                     android:layout_height="35dp"
@@ -37,15 +39,12 @@
                     android:theme="?attr/actionBarTheme"
                     android:minHeight="?attr/actionBarSize" android:id="@+id/main_toolbar"/>
             <FrameLayout
-                        android:id="@+id/frag_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                    android:id="@+id/frag_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-                </FrameLayout>
+            </FrameLayout>
         </LinearLayout>
-
-
-        <!-- SLIDING LAYOUT -->
         <LinearLayout
                 android:id="@+id/dragView"
                 android:layout_width="match_parent"

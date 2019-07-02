@@ -74,7 +74,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content" android:id="@+id/song_title_"
                                         android:textSize="@dimen/sp_title"
-                                        android:textColor="@color/black" android:padding="10dp" android:textStyle="bold"
+                                        android:textColor="@color/black" android:textStyle="bold"
                                         android:paddingStart="15dp" android:layout_weight="1"
                                         android:isScrollContainer="false"
 
@@ -83,7 +83,9 @@
                                         android:singleLine="true"
                                         android:scrollHorizontally="true"
                                         android:ellipsize="marquee"
-                                        android:marqueeRepeatLimit="marquee_forever"/>
+                                        android:marqueeRepeatLimit="marquee_forever"
+                                        android:paddingTop="10dp" android:paddingEnd="10dp"
+                                        android:paddingRight="10dp" android:paddingBottom="5dp"/>
                                 <ImageView
                                         android:layout_width="80dp"
                                         android:layout_height="35dp" app:srcCompat="@drawable/more"
@@ -94,7 +96,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" android:id="@+id/song_album"
                                 android:textSize="@dimen/sp_song"
-                                android:textColor="@color/black" android:paddingStart="15dp" android:padding="7dp"
+                                android:textColor="@color/black" android:paddingStart="15dp"
                                 android:paddingEnd="20dp"
 
                                 android:focusable="true"
@@ -102,7 +104,8 @@
                                 android:singleLine="true"
                                 android:scrollHorizontally="true"
                                 android:ellipsize="marquee"
-                                android:marqueeRepeatLimit="marquee_forever"/>
+                                android:marqueeRepeatLimit="marquee_forever" android:paddingTop="5dp"
+                                android:paddingRight="7dp" android:paddingBottom="7dp"/>
                 </LinearLayout>
                 <LinearLayout
                         android:orientation="horizontal"
