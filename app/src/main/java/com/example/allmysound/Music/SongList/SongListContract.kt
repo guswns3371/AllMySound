@@ -1,7 +1,7 @@
 package com.example.allmysound.Music.SongList
 
 import com.example.allmysound.Base.BaseContract
-import com.example.allmysound.SongInfo
+import com.example.allmysound.Main.Model.SongInfo
 
 interface SongListContract {
 

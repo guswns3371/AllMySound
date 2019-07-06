@@ -1,14 +1,14 @@
-package com.example.allmysound
+package com.example.allmysound.Main
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.media.AudioManager
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import android.view.KeyEvent
-import android.view.Menu
-import android.view.MenuItem
+import android.view.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.allmysound.Music.MusicFrag
@@ -20,11 +20,14 @@ import android.view.ViewGroup.MarginLayoutParams
 import androidx.appcompat.widget.Toolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.music_playing.*
-import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.eightbitlab.supportrenderscriptblur.SupportRenderScriptBlur
+import com.example.allmysound.Main.Dialog.MoreCustomDialog
+import com.example.allmysound.Main.Model.SongInfo
+import com.example.allmysound.Main.Pref.MySharedPreference
+import com.example.allmysound.R
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
@@ -32,14 +35,17 @@ import com.squareup.picasso.Picasso
 import java.util.concurrent.TimeUnit
 
 
-class MainActivity : AppCompatActivity(),MainContract.View{
+class MainActivity : AppCompatActivity(), MainContract.View {
     companion object {
         @SuppressLint("StaticFieldLeak")
         lateinit var prefs: MySharedPreference
 
-        var presenter: MainPresenter= MainPresenter()
-        fun createMainPresenter() : MainPresenter = this.presenter
+        var presenter: MainPresenter = MainPresenter()
+        fun createMainPresenter() : MainPresenter =
+            presenter
     }
+
+    private lateinit var customDialog : MoreCustomDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +59,7 @@ class MainActivity : AppCompatActivity(),MainContract.View{
         connectFragments(BtmNavView)
         initVolumeControl()
         textviewScrolling()
-        settingClickListners()
+        setClickListners()
     }
 
     override fun setMusicSeekBarMax(max: Int) {
@@ -78,7 +84,7 @@ class MainActivity : AppCompatActivity(),MainContract.View{
 
     }
 
-    fun settingClickListners(){
+    fun setClickListners(){
         dragView.setOnClickListener {
             if (sliding_layout.panelState !=SlidingUpPanelLayout.PanelState.EXPANDED
                 && sliding_layout.panelState !=SlidingUpPanelLayout.PanelState.ANCHORED){
@@ -94,11 +100,12 @@ class MainActivity : AppCompatActivity(),MainContract.View{
         music_control.setOnClickListener { sliding_layout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED }
         ctr_cover_cv.setOnClickListener { showToast("ctr_cover") }
         song_album.setOnClickListener { showToast("song_album") }
+        song_artist.setOnClickListener { showToast("song_artist") }
         more.setOnClickListener { presenter.moreBtnClicked() }
         play_pre.setOnClickListener { presenter.prevBtnClicked() }
         play.setOnClickListener { presenter.playBtnClicked()}
         play_next.setOnClickListener { presenter.nextBtnClicked()}
-        shuffle.setOnClickListener {presenter.shuffleBtnClicked()}
+        shuffle.setOnClickListener { presenter.shuffleBtnClicked()}
         like.setOnClickListener { presenter.likeBtnClicked() }
         rotate.setOnClickListener { presenter.rotateBtnClicked() }
     }
@@ -163,11 +170,8 @@ class MainActivity : AppCompatActivity(),MainContract.View{
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean { // 볼륨버튼으로 seekbar 조절
-        val am : AudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val currentVolume  = volume_seekbar.progress
         when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_UP -> {
-//                volume_seekbar.progress += 1
                 return true
             }
             KeyEvent.KEYCODE_VOLUME_DOWN -> {
@@ -181,15 +185,12 @@ class MainActivity : AppCompatActivity(),MainContract.View{
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        val am : AudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val currentVolume  = volume_seekbar.progress
         when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_UP -> {
                 volume_seekbar.progress +=1
                 return true
             }
             KeyEvent.KEYCODE_VOLUME_DOWN -> {
-//                volume_seekbar.progress -=1
                 return true
             }
             KeyEvent.KEYCODE_BACK -> {
@@ -209,6 +210,10 @@ class MainActivity : AppCompatActivity(),MainContract.View{
     override fun setSongAlbum(text:String) {
         song_album.text = text
     }
+
+    override fun setSongArtist(text: String) {
+        song_artist.text = text
+    }
     @SuppressLint("SetTextI18n")
     override fun setSongTime(text:String) {
         val timeLong = text.toLong()
@@ -224,8 +229,62 @@ class MainActivity : AppCompatActivity(),MainContract.View{
             .into(ctr_cover)
     }
 
-    override fun showMoreBtn() {
-//        showToast("more")
+    override fun showMoreBtn(songInfo: SongInfo){
+        customDialog= MoreCustomDialog(this)
+
+        customDialog.setSongList(presenter.getSongList())
+        customDialog.setNumList(presenter.getPlayList())
+        customDialog.setPlayingIdx(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)
+
+        customDialog.mSetData = object : MoreCustomDialog.SetData {
+            override fun setImage(): String = MainActivity.prefs.getIsPlayingInfo()!!.img
+            override fun setTitle(): String  =  MainActivity.prefs.getIsPlayingInfo()!!.title
+            override fun setArtist(): String =  MainActivity.prefs.getIsPlayingInfo()!!.artist
+            override fun setAlbum(): String =  MainActivity.prefs.getIsPlayingInfo()!!.album
+        }
+        customDialog.mClickListener = object: MoreCustomDialog.ClickListener {
+            override fun clickInfo() {
+                showToast("clickInfo")
+            }
+
+            override fun clickPlaylist() {
+                customDialog.showPlayList()
+            }
+
+            override fun clickPlaylistAdd() {
+                customDialog.showExistingPlayList()
+            }
+
+            override fun clickDelete() {
+                showToast("clickDelete")
+            }
+
+            override fun clickCancel() {
+                customDialog.cancel()
+            }
+
+            override fun clickShuffle() {
+                MainActivity.prefs.setShuffleBoolean(false)
+                presenter.shuffleBtnClicked()
+                customDialog.setNumList(presenter.getPlayList())
+                customDialog.setPlayingIdx(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)
+            }
+
+            override fun clickUnshuffle() {
+                MainActivity.prefs.setShuffleBoolean(true)
+                presenter.shuffleBtnClicked()
+                customDialog.setNumList(presenter.getPlayList())
+                customDialog.setPlayingIdx(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)
+            }
+        }
+//        customDialog.setCancelable(false)
+        customDialog.show()
+        //다이얼로그 크기 , 위치, 모양
+        customDialog.window?.setLayout(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT)
+        customDialog.window?.setGravity(Gravity.BOTTOM)
+        customDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
     override fun changePlayBtn(isPlay:Boolean){
         if (isPlay){

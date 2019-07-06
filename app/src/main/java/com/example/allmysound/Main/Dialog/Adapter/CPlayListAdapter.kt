@@ -1,4 +1,4 @@
-package com.example.allmysound.Music.SongList
+package com.example.allmysound.Main.Dialog.Adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,23 +9,26 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.net.toUri
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.example.allmysound.Main.MainActivity
-import com.example.allmysound.R
 import com.example.allmysound.Main.Model.SongInfo
-import kotlinx.android.synthetic.main.songlist_item.view.*
+import com.example.allmysound.R
 
-class SongListAdapter (
+
+
+
+class CPlayListAdapter (
     private val context: Context,
-    private val songlist: ArrayList<SongInfo>
-//    , val itemClick : (song: SongInfo,idx: Int) -> Unit
-): androidx.recyclerview.widget.RecyclerView.Adapter<SongListAdapter.MyViewHolder>()  {
+    private val songlist: ArrayList<SongInfo>,
+    private val numlist: ArrayList<Int>,
+    private val orderNum : Int
+): androidx.recyclerview.widget.RecyclerView.Adapter<CPlayListAdapter.MyViewHolder>()  {
 
-    interface SongListClickListener{
+    interface CustomPlayListClickListener{
         fun onClick(pos:Int)
     }
-    var mClickListener: SongListClickListener? =null
+    var mClickListener: CustomPlayListClickListener? =null
 
     inner class MyViewHolder (itemView : View?) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView!!) {
         val songimg = itemView?.findViewById<ImageView>(R.id.song_img)
@@ -41,21 +44,31 @@ class SongListAdapter (
                     .apply(RequestOptions().error(R.drawable.song_500))
                     .into(it)
             }
+//            val text  =
+//                "$pos :: ${numlist[pos]}/" +
+//                        "${numlist.indexOf(orderNum)}/"+
+//                        "${songlist[numlist[pos]].orderNum}/"+
+//                        "$orderNum"
+//            artistname?.text =text
             artistname?.text = song.artist
             songname?.text = song.title
 
-            if (MainActivity.prefs.getIsPlayingInfo()?.idx == song.idx){
-                playing_img?.visibility = View.VISIBLE
+            if(numlist.indexOf(orderNum) == pos)
                 songname?.typeface = Typeface.DEFAULT_BOLD
-            } else{
-                playing_img?.visibility = View.INVISIBLE
-                songname?.typeface = Typeface.DEFAULT
+
+            if(numlist.indexOf(orderNum) < pos){
+                playing_img?.visibility = View.VISIBLE
+//                itemView.layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT)
+            }else{
+                playing_img?.visibility = View.GONE
+//                itemView.layoutParams = RecyclerView.LayoutParams(0,0)
             }
+
+
 
             if(mClickListener!=null){
                 itemView.setOnClickListener{
                     mClickListener?.onClick(pos)
-                    it.playing_now_img.visibility = View.VISIBLE
                     notifyDataSetChanged()
                 }
             }
@@ -69,10 +82,16 @@ class SongListAdapter (
     }
 
     override fun getItemCount(): Int {
-        return songlist.size
+        return numlist.size
     }
 
     override fun onBindViewHolder(p0: MyViewHolder, p1: Int) {
-        p0.bind(songlist[p1],p1,context)
+        p0.bind(songlist[numlist[p1]],p1,context)
+    }
+
+    private fun removeItem(position: Int) {
+        songlist.removeAt(position)
+        notifyItemRemoved(position)
+        notifyItemRangeChanged(position, songlist.size)
     }
 }

@@ -1,45 +1,52 @@
-package com.example.allmysound
+package com.example.allmysound.Main
 
-import android.media.AudioManager
 import android.media.MediaPlayer
 import android.util.Log
 import android.view.View
 import android.widget.SeekBar
+import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.Music.SongList.SongListAdapter
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import java.lang.Exception
-import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
-class MainPresenter:MainContract.Presenter {
+class MainPresenter: MainContract.Presenter {
 
     private lateinit var view : MainContract.View
     private lateinit var songListAdapter :SongListAdapter
     private var songInfolist: ArrayList<SongInfo>? =null
     private var numList: ArrayList<Int>? = null
 //    private var songInfo: SongInfo? =null
+    private var isNewState : Boolean = true
     private var idx: Int =0
+    private var randomIdx: Int =-1
     private var mp :  MediaPlayer = MediaPlayer()
 
-    override fun linkData(songInfolist:  ArrayList<SongInfo>,songListAdapter: SongListAdapter) {
+    override fun getSongList(): ArrayList<SongInfo> = songInfolist!!
+    override fun getPlayList() :  ArrayList<Int> = numList!!
+
+    override fun linkData(songInfolist:  ArrayList<SongInfo>, songListAdapter: SongListAdapter) {
         this.songInfolist = songInfolist
         this.songListAdapter = songListAdapter
         numList = getNumList()
-        mp.setAudioStreamType(AudioManager.STREAM_MUSIC)
-        mp.setOnCompletionListener { MediaPlayer.OnCompletionListener {
-            nextMusic()
-        } }
     }
     override fun linkDataIndex(idx: Int) {
         this.idx = idx
-        SaveLoadPlay()
+        SaveLoadPrepareStart()
+        isNewState= false
     }
 
-    fun SaveLoadPlay(){
+    private fun SaveLoadPrepareStart(){
         saveData()
         loadData()
-        playMusic()
+        prepareMusic()
+        startMusic()
+    }
+    private fun SaveLoadPrepare(){
+        saveData()
+        loadData()
+        prepareMusic()
     }
     override fun saveData() {
         MainActivity.prefs.setIsPlayingInfo(songInfolist!![idx])
@@ -48,20 +55,36 @@ class MainPresenter:MainContract.Presenter {
         val songInfo =  MainActivity.prefs.getIsPlayingInfo()
         if (songInfo != null) {
             view.setSongAlbum(songInfo.album)
+            view.setSongArtist(songInfo.artist)
             view.setSongInnerTitle(songInfo.title)
             view.setSongTitle(songInfo.title)
             view.setSongAlbumArt(songInfo.img)
             view.setSongTime(songInfo.time)
-            this.idx = songInfo.num
+            this.idx = songInfo.orderNum
         }
     }
-    private fun playMusic(){
+    private fun startMusic(){
+        try {
+            mp.start()
+            mp.setOnCompletionListener {
+                nextBtnClicked()
+                mp.reset()
+                mp.setDataSource(songInfolist!![idx++].file_path)
+                mp.prepare()
+                connMusicSeekbar()
+                mp.start()
+            }
+        }catch (e : Exception){
+            Log.e("MediaPlayer Exception","$e")
+            e.printStackTrace()
+        }
+    }
+    private fun prepareMusic(){
         try {
             mp.reset()
             mp.setDataSource(songInfolist!![idx].file_path)
             mp.prepare()
-            connMusicSeekbar()
-            mp.start()
+            connMusicSeekbar() // mp.prepare() 이전에 위치하면 클남
             view.setMusicSeekBarListener(MusicSeekBarListener())
             mp.isLooping = MainActivity.prefs.getRotateBoolean()
         }catch (e : Exception){
@@ -72,36 +95,43 @@ class MainPresenter:MainContract.Presenter {
     private fun pauseMusic(){
         mp.pause()
     }
+
     private fun nextMusic(){
+        view.setMusicSeekBarProgress(0)
+
         if(MainActivity.prefs.getShuffleBoolean()){
-            idx++
-            idx = numList!![idx]
+            randomIdx++
+            if(randomIdx == numList!!.size)
+                randomIdx =0
+            idx = numList!![randomIdx]
         }else{
+            randomIdx =-1
             idx++
             if(idx == songInfolist!!.size)
                 idx =0
         }
         if(mp.isPlaying)
-            SaveLoadPlay()
+            SaveLoadPrepareStart()
         else{
-            saveData()
-            loadData()
+            SaveLoadPrepare()
         }
     }
     private fun prevMusic(){
         if(MainActivity.prefs.getShuffleBoolean()){
-            idx--
-            idx = numList!![idx]
+            randomIdx--
+            if(randomIdx<=-1)
+                randomIdx = numList!!.size-1
+            idx = numList!![randomIdx]
         }else{
+            randomIdx = -1
             idx--
             if(idx <0)
                 idx =songInfolist!!.size-1
         }
         if(mp.isPlaying)
-            SaveLoadPlay()
+            SaveLoadPrepareStart()
         else{
-            saveData()
-            loadData()
+            SaveLoadPrepare()
         }
     }
     private fun getNumList() : ArrayList<Int>{
@@ -130,7 +160,6 @@ class MainPresenter:MainContract.Presenter {
         }
     }
     fun connMusicSeekbar() {
-        view.setMusicSeekBarProgress(0)
         view.setMusicSeekBarMax(mp.duration)
         view.updateMusicSeekBarNTime()
     }
@@ -167,13 +196,19 @@ class MainPresenter:MainContract.Presenter {
 
     override fun moreBtnClicked() {
         val songInfo =  MainActivity.prefs.getIsPlayingInfo()
-        view.showToast(songInfo.toString())
+        Log.e("moreBtnClicked ",songInfo.toString())
+        view.showMoreBtn(songInfo!!)
     }
     override fun playBtnClicked() {
         if(MainActivity.prefs.getPlayBoolean()){
             view.changePlayBtn(true)
             MainActivity.prefs.setPlayBoolean(false)
-            playMusic()
+            if(isNewState){
+                prepareMusic()
+                startMusic()
+            }else{
+                startMusic()
+            }
         }else{
             view.changePlayBtn(false)
             MainActivity.prefs.setPlayBoolean(true)
@@ -208,6 +243,7 @@ class MainPresenter:MainContract.Presenter {
             MainActivity.prefs.setShuffleBoolean(true)
         }
         numList = getNumList()
+        randomIdx =-1
     }
     override fun likeBtnClicked(){
         if(MainActivity.prefs.getLikeBoolean()){

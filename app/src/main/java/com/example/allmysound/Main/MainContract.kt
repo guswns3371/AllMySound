@@ -1,8 +1,9 @@
-package com.example.allmysound
+package com.example.allmysound.Main
 
 import android.widget.SeekBar
 import androidx.appcompat.widget.Toolbar
 import com.example.allmysound.Base.BaseContract
+import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.Music.SongList.SongListAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
@@ -17,10 +18,11 @@ interface MainContract {
         fun setBNVHeight(distance:Float)
         fun setBNVSize(distance:Float)
 
-        fun showMoreBtn()
+        fun showMoreBtn(songInfo: SongInfo)
         fun setSongTitle(text:String)
         fun setSongInnerTitle(text:String)
         fun setSongAlbum(text:String)
+        fun setSongArtist(text:String)
         fun setSongTime(text:String)
         fun setSongAlbumArt(uri: String)
 
@@ -41,9 +43,11 @@ interface MainContract {
         override fun setView(view: View)
         override fun releaseView()
 
-        fun linkData(songInfolist: ArrayList<SongInfo>,songListAdapter: SongListAdapter)
+        fun linkData(songInfolist: ArrayList<SongInfo>, songListAdapter: SongListAdapter)
         fun linkDataIndex(idx : Int)
         fun loadData()
+        fun getSongList() :  ArrayList<SongInfo>
+        fun getPlayList() :  ArrayList<Int>
         fun loadSetting()
         fun saveData()
         fun getMusicSeekBarNTime()

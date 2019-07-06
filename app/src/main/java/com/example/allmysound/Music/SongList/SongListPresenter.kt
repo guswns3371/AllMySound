@@ -6,7 +6,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
-import com.example.allmysound.SongInfo
+import com.example.allmysound.Main.Model.SongInfo
 import java.io.FileNotFoundException
 import java.io.IOException
 
@@ -72,7 +72,7 @@ class SongListPresenter(private var context: Context?):SongListContract.Presente
             val filename = cursor.getString(column_index_name)
             val album = cursor.getString(column_index_data_album)
             val albumId = cursor.getLong(column_index_data_albumid)
-            val time = cursor.getString(column_index_data_time)
+            var time = cursor.getString(column_index_data_time)
             var imgUri: Uri? = null
             try {
                 val sArtworkUri = Uri.parse("content://media/external/audio/albumart")
@@ -82,7 +82,20 @@ class SongListPresenter(private var context: Context?):SongListContract.Presente
             }catch (e : IOException){
                 Log.e("Artwork Exception2","$e")
             }
-            listOfAllSongs.add(SongInfo(num,idx,imgUri.toString(),artist,title,album,time,path,filename))
+            time = if(time==null) "0" else time
+            listOfAllSongs.add(
+                SongInfo(
+                    num,
+                    idx,
+                    imgUri.toString(),
+                    artist,
+                    title,
+                    album,
+                    time,
+                    path,
+                    filename
+                )
+            )
             num++
             //uri 를 저장해버리면 => json으로 변환시 uri 부분이 변환되지 않는다
         }

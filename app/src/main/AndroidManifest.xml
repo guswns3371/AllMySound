@@ -19,7 +19,7 @@
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
         <activity
-                android:name=".MainActivity"
+                android:name=".Main.MainActivity"
                 android:configChanges="orientation|screenSize"
                 android:screenOrientation="portrait">
             <intent-filter>

@@ -1,7 +1,8 @@
-package com.example.allmysound
+package com.example.allmysound.Main.Pref
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.allmysound.Main.Model.SongInfo
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -48,7 +49,7 @@ class MySharedPreference(private var context: Context) {
         val strSongInfo = gson.toJson(value)
         editor.putString(SONGINFO,strSongInfo).apply()
     }
-    fun getIsPlayingInfo():SongInfo?{
+    fun getIsPlayingInfo(): SongInfo?{
         val str = prefs.getString(SONGINFO,null)
         return if (str == null) null else Gson().fromJson(str)
     }

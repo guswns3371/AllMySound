@@ -1,10 +1,7 @@
-package com.example.allmysound
-
-import android.graphics.Bitmap
-import android.net.Uri
+package com.example.allmysound.Main.Model
 
 class SongInfo{
-    var num:Int
+     var orderNum:Int
      var idx: String
      var img: String
      var artist: String
@@ -15,10 +12,10 @@ class SongInfo{
      var file_name: String
 
     constructor(
-        num:Int,
+        orderNum:Int,
         idx: String, img: String, artist: String, title: String,
-        album: String,time: String, file_path: String, file_name: String) {
-        this.num = num
+        album: String, time: String, file_path: String, file_name: String) {
+        this.orderNum = orderNum
         this.idx = idx
         this.img = img
         this.artist = artist

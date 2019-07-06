@@ -10,4 +10,5 @@
     <color name="colorOverlay">#00000000</color>
     <color name="seekbarColor">#9B9B9B</color>
     <color name="seekbarThumColor">#9B9B9B</color>
+    <color name="translucent">#20000000</color>
 </resources>

@@ -10,9 +10,9 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
-import com.example.allmysound.MainActivity
+import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.R
-import com.example.allmysound.SongInfo
+import com.example.allmysound.Main.Model.SongInfo
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
 import com.reddit.indicatorfastscroll.FastScrollItemIndicator

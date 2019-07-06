@@ -5,7 +5,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:animateLayoutChanges="true"
-                tools:context=".MainActivity">
+                tools:context=".Main.MainActivity">
 
 
     <com.sothree.slidinguppanel.SlidingUpPanelLayout
@@ -45,19 +45,20 @@
 
             </FrameLayout>
         </LinearLayout>
-        <LinearLayout
-                android:id="@+id/dragView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#ffffff"
-                android:clickable="true"
-                android:focusable="false"
-                android:orientation="vertical">
 
-            <include layout="@layout/music_control"/>
-            <include layout="@layout/music_playing"/>
+            <LinearLayout
+                    android:id="@+id/dragView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#ffffff"
+                    android:clickable="true"
+                    android:focusable="false"
+                    android:orientation="vertical">
 
-        </LinearLayout>
+                <include layout="@layout/music_control"/>
+                <include layout="@layout/music_playing"/>
+            </LinearLayout>
+
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
