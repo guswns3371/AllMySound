@@ -12,33 +12,35 @@ import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.R
-
-
 
 
 class CPlayListAdapter (
     private val context: Context,
     private val songlist: ArrayList<SongInfo>,
-    private val numlist: ArrayList<Int>,
-    private val orderNum : Int
-): androidx.recyclerview.widget.RecyclerView.Adapter<CPlayListAdapter.MyViewHolder>()  {
+    private val numlist: ArrayList<Int>
+): RecyclerView.Adapter<CPlayListAdapter.MyViewHolder>()  {
 
     interface CustomPlayListClickListener{
-        fun onClick(pos:Int)
+        fun onItemClick(pos:Int)
+        fun onMovingLongClick(pos:Int)
+        fun onViewMoved(oldPos: Int, newPos: Int)
+        fun onViewSwiped(pos : Int)
     }
     var mClickListener: CustomPlayListClickListener? =null
 
-    inner class MyViewHolder (itemView : View?) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView!!) {
-        val songimg = itemView?.findViewById<ImageView>(R.id.song_img)
-        val artistname = itemView?.findViewById<TextView>(R.id.song_artist)
-        val songname = itemView?.findViewById<TextView>(R.id.song_title)
-        val playing_img = itemView?.findViewById<ImageView>(R.id.playing_now_img)
+    inner class MyViewHolder (itemView : View?) : RecyclerView.ViewHolder(itemView!!) {
+        val csongimg = itemView?.findViewById<ImageView>(R.id.csong_img)
+        val cartistname = itemView?.findViewById<TextView>(R.id.csong_artist)
+        val csongname = itemView?.findViewById<TextView>(R.id.csong_title)
+        val cplaying_img = itemView?.findViewById<ImageView>(R.id.cplaying_now_img)
+        val cmoving_playlist = itemView?.findViewById<ImageView>(R.id.cmoving_playlist)
         @SuppressLint("ResourceAsColor")
         fun bind(song: SongInfo, pos : Int, context: Context) {
 
-            this.songimg?.let {
+            this.csongimg?.let {
                 Glide.with(context)
                     .load(song.img.toUri())
                     .apply(RequestOptions().error(R.drawable.song_500))
@@ -49,35 +51,41 @@ class CPlayListAdapter (
 //                        "${numlist.indexOf(orderNum)}/"+
 //                        "${songlist[numlist[pos]].orderNum}/"+
 //                        "$orderNum"
-//            artistname?.text =text
-            artistname?.text = song.artist
-            songname?.text = song.title
+//            cartistname?.text =text
+            cartistname?.text = song.artist
+            csongname?.text = song.title
 
-            if(numlist.indexOf(orderNum) == pos)
-                songname?.typeface = Typeface.DEFAULT_BOLD
-
-            if(numlist.indexOf(orderNum) < pos){
-                playing_img?.visibility = View.VISIBLE
-//                itemView.layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT)
-            }else{
-                playing_img?.visibility = View.GONE
-//                itemView.layoutParams = RecyclerView.LayoutParams(0,0)
+            val orderNum= MainActivity.prefs.getIsPlayingInfo()!!.orderNum
+            if(numlist.indexOf(orderNum) == pos){
+                csongname?.typeface = Typeface.DEFAULT_BOLD
+                cplaying_img?.visibility = View.VISIBLE
+                cmoving_playlist?.visibility = View.GONE
+            } else{
+                csongname?.typeface = Typeface.DEFAULT
+                cplaying_img?.visibility = View.GONE
+                cmoving_playlist?.visibility = View.VISIBLE
             }
-
-
 
             if(mClickListener!=null){
                 itemView.setOnClickListener{
-                    mClickListener?.onClick(pos)
+                    mClickListener?.onItemClick(pos)
+                    MainActivity.prefs.setIsPlayingInfo(song)
                     notifyDataSetChanged()
                 }
+                if(cplaying_img?.visibility == View.GONE){
+                    itemView.setOnLongClickListener {
+                        mClickListener?.onMovingLongClick(pos)
+                        true
+                    }
+                }
+
             }
         }
 
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): MyViewHolder {
-        val  view = LayoutInflater.from(context).inflate(R.layout.songlist_item,p0,false)
+        val  view = LayoutInflater.from(context).inflate(R.layout.cplaylist_item,p0,false)
         return MyViewHolder(view)
     }
 
@@ -94,4 +102,17 @@ class CPlayListAdapter (
         notifyItemRemoved(position)
         notifyItemRangeChanged(position, songlist.size)
     }
+
+    fun onPositionMoved(oldPos: Int, newPos: Int){
+        val tartgetSong = songlist[numlist[oldPos]]
+        songlist.removeAt(numlist[oldPos])
+        songlist.add(numlist[newPos],tartgetSong)
+        notifyItemMoved(oldPos,newPos)
+    }
+
+    fun onPositionSwiped(pos:Int){
+        songlist.removeAt(numlist[pos])
+        notifyItemRemoved(pos)
+    }
+
 }

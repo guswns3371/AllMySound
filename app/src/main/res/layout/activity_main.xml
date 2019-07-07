@@ -55,7 +55,6 @@
                     android:focusable="false"
                     android:orientation="vertical">
 
-                <include layout="@layout/music_control"/>
                 <include layout="@layout/music_playing"/>
             </LinearLayout>
 

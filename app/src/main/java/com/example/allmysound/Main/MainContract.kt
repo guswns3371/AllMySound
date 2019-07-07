@@ -3,6 +3,7 @@ package com.example.allmysound.Main
 import android.widget.SeekBar
 import androidx.appcompat.widget.Toolbar
 import com.example.allmysound.Base.BaseContract
+import com.example.allmysound.Main.Dialog.Adapter.CPlayListAdapter
 import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.Music.SongList.SongListAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -45,6 +46,10 @@ interface MainContract {
 
         fun linkData(songInfolist: ArrayList<SongInfo>, songListAdapter: SongListAdapter)
         fun linkDataIndex(idx : Int)
+
+        fun PlaylistllinkData(cplayListAdapter: CPlayListAdapter)
+        fun PlaylistllinkDataIndex(randomIdx : Int)
+
         fun loadData()
         fun getSongList() :  ArrayList<SongInfo>
         fun getPlayList() :  ArrayList<Int>

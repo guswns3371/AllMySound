@@ -6,9 +6,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.core.net.toUri
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.allmysound.Main.Dialog.Adapter.CPlayListAdapter
+import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.R
 import com.squareup.picasso.Picasso
@@ -35,16 +38,12 @@ class MoreCustomDialog(context: Context) : Dialog(context) {
     var mSetData: SetData? =null
     private lateinit var songlist : ArrayList<SongInfo>
     private lateinit var numlist: ArrayList<Int>
-    private  var orderNum: Int? = null
     private var myCPlayListAdapter : CPlayListAdapter? =null
     fun setSongList(songlist : ArrayList<SongInfo>){
         this.songlist = songlist
     }
     fun setNumList(numlist : ArrayList<Int>){
         this.numlist = numlist
-    }
-    fun setPlayingIdx(orderNum: Int){
-        this.orderNum = orderNum
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,17 +88,37 @@ class MoreCustomDialog(context: Context) : Dialog(context) {
         more_artist.isSelected =true
         more_album.isSelected =true
     }
+
     private fun setPlayListRV(){
-        myCPlayListAdapter = CPlayListAdapter(context,songlist,numlist,orderNum!!)
+        myCPlayListAdapter = CPlayListAdapter(context,songlist,numlist)
         myCPlayListAdapter!!.mClickListener = object : CPlayListAdapter.CustomPlayListClickListener{
-            override fun onClick(pos: Int) {
+            override fun onItemClick(pos: Int) {
+                MainActivity.createMainPresenter().PlaylistllinkDataIndex(pos)
+                MainActivity.createMainPresenter().checkIsPlaying()
+            }
+
+            override fun onMovingLongClick(pos: Int) {
+                showLog(pos)
+            }
+
+            override fun onViewMoved(oldPos: Int, newPos: Int) {
+                myCPlayListAdapter!!.onPositionMoved(oldPos, newPos)
+            }
+
+            override fun onViewSwiped(pos: Int) {
+                myCPlayListAdapter!!.onPositionSwiped(pos)
             }
         }
+        MainActivity.createMainPresenter().PlaylistllinkData(myCPlayListAdapter!!)
         playlist_RV.adapter = myCPlayListAdapter
         playlist_RV.layoutManager= LinearLayoutManager(context)
         playlist_RV.setHasFixedSize(true)
-        Log.e("setPlayList ", "${numlist.indexOf(orderNum!!)}")
-        playlist_RV.scrollToPosition(numlist.indexOf(orderNum!!))
+//        https://www.youtube.com/watch?v=dldrLPNoFnk
+
+
+        val orderNum = MainActivity.prefs.getIsPlayingInfo()!!.orderNum
+        Log.e("setPlayList ", "${numlist.indexOf(orderNum)}")
+        playlist_RV.scrollToPosition(numlist.indexOf(orderNum))
     }
     private fun setExistingPlayListRV(){
 
@@ -130,5 +149,12 @@ class MoreCustomDialog(context: Context) : Dialog(context) {
         if(existing_RV.visibility==View.VISIBLE)
             hideExistingPlayList()
 
+        if(more_setting.visibility==View.VISIBLE)
+           super.onBackPressed()
+    }
+
+    private fun showLog(message: Any) {
+        Log.e("onMovingLongClick ","$message")
+//        Toast.makeText(context,message, Toast.LENGTH_SHORT).show()
     }
 }

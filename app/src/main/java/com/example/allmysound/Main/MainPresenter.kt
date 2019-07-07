@@ -4,6 +4,7 @@ import android.media.MediaPlayer
 import android.util.Log
 import android.view.View
 import android.widget.SeekBar
+import com.example.allmysound.Main.Dialog.Adapter.CPlayListAdapter
 import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.Music.SongList.SongListAdapter
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
@@ -15,10 +16,12 @@ class MainPresenter: MainContract.Presenter {
 
     private lateinit var view : MainContract.View
     private lateinit var songListAdapter :SongListAdapter
+    private lateinit var cplayListAdapter :CPlayListAdapter
     private var songInfolist: ArrayList<SongInfo>? =null
     private var numList: ArrayList<Int>? = null
 //    private var songInfo: SongInfo? =null
     private var isNewState : Boolean = true
+    private var isPlayListState : Boolean = false
     private var idx: Int =0
     private var randomIdx: Int =-1
     private var mp :  MediaPlayer = MediaPlayer()
@@ -35,6 +38,18 @@ class MainPresenter: MainContract.Presenter {
         this.idx = idx
         SaveLoadPrepareStart()
         isNewState= false
+        isPlayListState = false
+    }
+
+    override fun PlaylistllinkData(cplayListAdapter: CPlayListAdapter) {
+        this.cplayListAdapter = cplayListAdapter
+        isPlayListState = true
+    }
+    override fun PlaylistllinkDataIndex(randomIdx: Int) {
+        this.randomIdx = randomIdx
+        idx = numList!![this.randomIdx]
+        SaveLoadPrepareStart()
+        songListAdapter.notifyDataSetChanged()
     }
 
     private fun SaveLoadPrepareStart(){
@@ -73,6 +88,8 @@ class MainPresenter: MainContract.Presenter {
                 mp.prepare()
                 connMusicSeekbar()
                 mp.start()
+
+                notifyAdapters()
             }
         }catch (e : Exception){
             Log.e("MediaPlayer Exception","$e")
@@ -217,11 +234,11 @@ class MainPresenter: MainContract.Presenter {
     }
     override fun nextBtnClicked() {
         nextMusic()
-        songListAdapter.notifyDataSetChanged()
+        notifyAdapters()
     }
     override fun prevBtnClicked() {
         prevMusic()
-        songListAdapter.notifyDataSetChanged()
+        notifyAdapters()
     }
     override fun rotateBtnClicked() {
         if(MainActivity.prefs.getRotateBoolean()){
@@ -242,8 +259,8 @@ class MainPresenter: MainContract.Presenter {
             view.changeShuffleBtn(true)
             MainActivity.prefs.setShuffleBoolean(true)
         }
-        numList = getNumList()
-        randomIdx =-1
+
+        setRandomIdx_NumList()
     }
     override fun likeBtnClicked(){
         if(MainActivity.prefs.getLikeBoolean()){
@@ -278,5 +295,16 @@ class MainPresenter: MainContract.Presenter {
                 }
             }
         }
+    }
+
+    private fun notifyAdapters(){
+        songListAdapter.notifyDataSetChanged()
+        if(isPlayListState)
+            cplayListAdapter.notifyDataSetChanged()
+    }
+
+    fun setRandomIdx_NumList(){
+            numList = getNumList()
+            randomIdx = numList!!.indexOf(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)
     }
 }

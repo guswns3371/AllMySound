@@ -74,6 +74,7 @@ class SongListFrag: Fragment(),SongListContract.View {
             override fun onClick(pos: Int) {
                 MainActivity.createMainPresenter().linkDataIndex(pos)
                 MainActivity.createMainPresenter().checkIsPlaying()
+                MainActivity.createMainPresenter().setRandomIdx_NumList()
             }
         }
         MainActivity.createMainPresenter().linkData(songInfos,myAdapter)
@@ -95,9 +96,6 @@ class SongListFrag: Fragment(),SongListContract.View {
             }
         )
         mFastScrollThumbView.setupWithFastScroller(mFastScrollView)
-        val smoothScroller: LinearSmoothScroller = object : LinearSmoothScroller(activity!!) {
-            override fun getVerticalSnapPreference(): Int = SNAP_TO_START
-        }
         mFastScrollView.itemIndicatorSelectedCallbacks += object : FastScrollerView.ItemIndicatorSelectedCallback {
             override fun onItemIndicatorSelected(
                 indicator: FastScrollItemIndicator,

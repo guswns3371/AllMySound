@@ -15,7 +15,6 @@ import com.example.allmysound.Music.MusicFrag
 import com.example.allmysound.Recommend.RecommendFrag
 import com.example.allmysound.Search.SearchFrag
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.music_control.*
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.appcompat.widget.Toolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -96,9 +95,14 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
         ctr_play.setOnClickListener { presenter.playBtnClicked() }
         ctr_next.setOnClickListener {  presenter.nextBtnClicked() }
-        music_control.setOnLongClickListener { showToast("music_control");true }
+        music_control.setOnLongClickListener {
+            if (sliding_layout.panelState !=SlidingUpPanelLayout.PanelState.EXPANDED)
+            showToast("music_control")
+            true }
         music_control.setOnClickListener { sliding_layout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED }
-        ctr_cover_cv.setOnClickListener { showToast("ctr_cover") }
+        ctr_cover_cv.setOnClickListener {
+            if (sliding_layout.panelState ==SlidingUpPanelLayout.PanelState.EXPANDED)
+            showToast("ctr_cover") }
         song_album.setOnClickListener { showToast("song_album") }
         song_artist.setOnClickListener { showToast("song_artist") }
         more.setOnClickListener { presenter.moreBtnClicked() }
@@ -234,7 +238,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
         customDialog.setSongList(presenter.getSongList())
         customDialog.setNumList(presenter.getPlayList())
-        customDialog.setPlayingIdx(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)
 
         customDialog.mSetData = object : MoreCustomDialog.SetData {
             override fun setImage(): String = MainActivity.prefs.getIsPlayingInfo()!!.img
@@ -267,14 +270,12 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 MainActivity.prefs.setShuffleBoolean(false)
                 presenter.shuffleBtnClicked()
                 customDialog.setNumList(presenter.getPlayList())
-                customDialog.setPlayingIdx(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)
             }
 
             override fun clickUnshuffle() {
                 MainActivity.prefs.setShuffleBoolean(true)
                 presenter.shuffleBtnClicked()
                 customDialog.setNumList(presenter.getPlayList())
-                customDialog.setPlayingIdx(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)
             }
         }
 //        customDialog.setCancelable(false)

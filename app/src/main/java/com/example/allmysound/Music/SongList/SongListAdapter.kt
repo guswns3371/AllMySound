@@ -55,7 +55,6 @@ class SongListAdapter (
             if(mClickListener!=null){
                 itemView.setOnClickListener{
                     mClickListener?.onClick(pos)
-                    it.playing_now_img.visibility = View.VISIBLE
                     notifyDataSetChanged()
                 }
             }
