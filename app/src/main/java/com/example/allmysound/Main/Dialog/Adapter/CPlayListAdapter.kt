@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -15,21 +16,20 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.R
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class CPlayListAdapter (
     private val context: Context,
-    private val songlist: ArrayList<SongInfo>,
-    private val numlist: ArrayList<Int>
+    private var songlist: ArrayList<SongInfo>
 ): RecyclerView.Adapter<CPlayListAdapter.MyViewHolder>()  {
 
     interface CustomPlayListClickListener{
         fun onItemClick(pos:Int)
-        fun onMovingLongClick(pos:Int)
-        fun onViewMoved(oldPos: Int, newPos: Int)
-        fun onViewSwiped(pos : Int)
     }
     var mClickListener: CustomPlayListClickListener? =null
+    private val numlist: ArrayList<Int> = MainActivity.prefs.getPlayListInt()
 
     inner class MyViewHolder (itemView : View?) : RecyclerView.ViewHolder(itemView!!) {
         val csongimg = itemView?.findViewById<ImageView>(R.id.csong_img)
@@ -72,16 +72,8 @@ class CPlayListAdapter (
                     MainActivity.prefs.setIsPlayingInfo(song)
                     notifyDataSetChanged()
                 }
-                if(cplaying_img?.visibility == View.GONE){
-                    itemView.setOnLongClickListener {
-                        mClickListener?.onMovingLongClick(pos)
-                        true
-                    }
-                }
-
             }
         }
-
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): MyViewHolder {
@@ -104,9 +96,18 @@ class CPlayListAdapter (
     }
 
     fun onPositionMoved(oldPos: Int, newPos: Int){
-        val tartgetSong = songlist[numlist[oldPos]]
-        songlist.removeAt(numlist[oldPos])
-        songlist.add(numlist[newPos],tartgetSong)
+        val oldNum = numlist[oldPos]
+        numlist.remove(oldNum)
+        numlist.add(newPos,oldNum)
+        MainActivity.prefs.setPlayListInt(numlist)
+
+        if(MainActivity.prefs.getShuffleBoolean())
+            MainActivity.presenter.PlaylistllinkDataUpdateIndex(
+            numlist.indexOf(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)) // randomIdx를 업데이트 한다
+        else
+            MainActivity.presenter.linkDataUpdateIndex(
+                numlist.indexOf(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)) // Idx를 업데이트 한다
+
         notifyItemMoved(oldPos,newPos)
     }
 
@@ -114,5 +115,4 @@ class CPlayListAdapter (
         songlist.removeAt(numlist[pos])
         notifyItemRemoved(pos)
     }
-
 }

@@ -46,9 +46,11 @@ interface MainContract {
 
         fun linkData(songInfolist: ArrayList<SongInfo>, songListAdapter: SongListAdapter)
         fun linkDataIndex(idx : Int)
+        fun linkDataUpdateIndex(idx : Int)
 
         fun PlaylistllinkData(cplayListAdapter: CPlayListAdapter)
         fun PlaylistllinkDataIndex(randomIdx : Int)
+        fun PlaylistllinkDataUpdateIndex(randomIdx : Int)
 
         fun loadData()
         fun getSongList() :  ArrayList<SongInfo>

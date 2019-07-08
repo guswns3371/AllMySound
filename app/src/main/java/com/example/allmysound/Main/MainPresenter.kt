@@ -18,7 +18,7 @@ class MainPresenter: MainContract.Presenter {
     private lateinit var songListAdapter :SongListAdapter
     private lateinit var cplayListAdapter :CPlayListAdapter
     private var songInfolist: ArrayList<SongInfo>? =null
-    private var numList: ArrayList<Int>? = null
+    private var numList: ArrayList<Int>? =  null
 //    private var songInfo: SongInfo? =null
     private var isNewState : Boolean = true
     private var isPlayListState : Boolean = false
@@ -41,15 +41,24 @@ class MainPresenter: MainContract.Presenter {
         isPlayListState = false
     }
 
+    override fun linkDataUpdateIndex(idx: Int) {
+        this.idx = idx
+    }
+
     override fun PlaylistllinkData(cplayListAdapter: CPlayListAdapter) {
         this.cplayListAdapter = cplayListAdapter
         isPlayListState = true
     }
     override fun PlaylistllinkDataIndex(randomIdx: Int) {
         this.randomIdx = randomIdx
-        idx = numList!![this.randomIdx]
+        val numList = MainActivity.prefs.getPlayListInt()
+        idx = numList[randomIdx]
         SaveLoadPrepareStart()
         songListAdapter.notifyDataSetChanged()
+    }
+
+    override fun PlaylistllinkDataUpdateIndex(randomIdx: Int) {
+        this.randomIdx = randomIdx
     }
 
     private fun SaveLoadPrepareStart(){
@@ -115,12 +124,12 @@ class MainPresenter: MainContract.Presenter {
 
     private fun nextMusic(){
         view.setMusicSeekBarProgress(0)
-
+        val numList = MainActivity.prefs.getPlayListInt()
         if(MainActivity.prefs.getShuffleBoolean()){
             randomIdx++
-            if(randomIdx == numList!!.size)
+            if(randomIdx == numList.size)
                 randomIdx =0
-            idx = numList!![randomIdx]
+            idx = numList[randomIdx]
         }else{
             randomIdx =-1
             idx++
@@ -134,11 +143,12 @@ class MainPresenter: MainContract.Presenter {
         }
     }
     private fun prevMusic(){
+        val numList = MainActivity.prefs.getPlayListInt()
         if(MainActivity.prefs.getShuffleBoolean()){
             randomIdx--
             if(randomIdx<=-1)
-                randomIdx = numList!!.size-1
-            idx = numList!![randomIdx]
+                randomIdx = numList.size-1
+            idx = numList[randomIdx]
         }else{
             randomIdx = -1
             idx--
@@ -159,6 +169,8 @@ class MainPresenter: MainContract.Presenter {
 
         if(MainActivity.prefs.getShuffleBoolean())
             numbers.shuffle()
+
+        MainActivity.prefs.setPlayListInt(numbers)
         return numbers
     }
 

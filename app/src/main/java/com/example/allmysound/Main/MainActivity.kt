@@ -237,7 +237,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         customDialog= MoreCustomDialog(this)
 
         customDialog.setSongList(presenter.getSongList())
-        customDialog.setNumList(presenter.getPlayList())
 
         customDialog.mSetData = object : MoreCustomDialog.SetData {
             override fun setImage(): String = MainActivity.prefs.getIsPlayingInfo()!!.img
@@ -269,13 +268,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             override fun clickShuffle() {
                 MainActivity.prefs.setShuffleBoolean(false)
                 presenter.shuffleBtnClicked()
-                customDialog.setNumList(presenter.getPlayList())
             }
 
             override fun clickUnshuffle() {
                 MainActivity.prefs.setShuffleBoolean(true)
                 presenter.shuffleBtnClicked()
-                customDialog.setNumList(presenter.getPlayList())
             }
         }
 //        customDialog.setCancelable(false)

@@ -10,12 +10,15 @@ import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.allmysound.Main.Dialog.Adapter.CPlayListAdapter
 import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.R
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.music_more_custom.*
+import java.util.*
+import kotlin.collections.ArrayList
 
 class MoreCustomDialog(context: Context) : Dialog(context) {
     interface ClickListener{
@@ -37,13 +40,9 @@ class MoreCustomDialog(context: Context) : Dialog(context) {
     var mClickListener: ClickListener? =null
     var mSetData: SetData? =null
     private lateinit var songlist : ArrayList<SongInfo>
-    private lateinit var numlist: ArrayList<Int>
     private var myCPlayListAdapter : CPlayListAdapter? =null
     fun setSongList(songlist : ArrayList<SongInfo>){
         this.songlist = songlist
-    }
-    fun setNumList(numlist : ArrayList<Int>){
-        this.numlist = numlist
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +51,8 @@ class MoreCustomDialog(context: Context) : Dialog(context) {
         setDatas()
         textScrolling()
         setPlayListRV()
+
+        initTouchHelper()
     }
     private fun setting(){
         val layoutParams = WindowManager.LayoutParams()
@@ -90,33 +91,21 @@ class MoreCustomDialog(context: Context) : Dialog(context) {
     }
 
     private fun setPlayListRV(){
-        myCPlayListAdapter = CPlayListAdapter(context,songlist,numlist)
+        myCPlayListAdapter = CPlayListAdapter(context,songlist)
         myCPlayListAdapter!!.mClickListener = object : CPlayListAdapter.CustomPlayListClickListener{
             override fun onItemClick(pos: Int) {
                 MainActivity.createMainPresenter().PlaylistllinkDataIndex(pos)
                 MainActivity.createMainPresenter().checkIsPlaying()
-            }
-
-            override fun onMovingLongClick(pos: Int) {
-                showLog(pos)
-            }
-
-            override fun onViewMoved(oldPos: Int, newPos: Int) {
-                myCPlayListAdapter!!.onPositionMoved(oldPos, newPos)
-            }
-
-            override fun onViewSwiped(pos: Int) {
-                myCPlayListAdapter!!.onPositionSwiped(pos)
             }
         }
         MainActivity.createMainPresenter().PlaylistllinkData(myCPlayListAdapter!!)
         playlist_RV.adapter = myCPlayListAdapter
         playlist_RV.layoutManager= LinearLayoutManager(context)
         playlist_RV.setHasFixedSize(true)
-//        https://www.youtube.com/watch?v=dldrLPNoFnk
-
+//     https://www.youtube.com/watch?v=dldrLPNoFnk
 
         val orderNum = MainActivity.prefs.getIsPlayingInfo()!!.orderNum
+        val numlist = MainActivity.prefs.getPlayListInt()
         Log.e("setPlayList ", "${numlist.indexOf(orderNum)}")
         playlist_RV.scrollToPosition(numlist.indexOf(orderNum))
     }
@@ -124,6 +113,29 @@ class MoreCustomDialog(context: Context) : Dialog(context) {
 
     }
 
+    private fun initTouchHelper(){
+        val touchHelper = ItemTouchHelper(object: ItemTouchHelper.SimpleCallback
+            (ItemTouchHelper.UP or ItemTouchHelper.DOWN,0){
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                val sourcePos = viewHolder.adapterPosition
+                val targetPos = target.adapterPosition
+                myCPlayListAdapter!!.onPositionMoved(sourcePos, targetPos)
+                return true
+            }
+
+            override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+//                super.clearView(recyclerView, viewHolder)
+                myCPlayListAdapter!!.notifyDataSetChanged() // 유저가 drop할 때 notifydatasetchanged를 해준다.
+            }
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            }
+        })
+        touchHelper.attachToRecyclerView(playlist_RV)
+    }
     fun showPlayList(){
         more_setting.visibility = View.GONE
         playlist_LO.visibility = View.VISIBLE
@@ -154,7 +166,7 @@ class MoreCustomDialog(context: Context) : Dialog(context) {
     }
 
     private fun showLog(message: Any) {
-        Log.e("onMovingLongClick ","$message")
+        Log.e("MoreCustomDialog  ","$message")
 //        Toast.makeText(context,message, Toast.LENGTH_SHORT).show()
     }
 }

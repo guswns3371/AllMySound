@@ -2,6 +2,7 @@ package com.example.allmysound.Main.Pref
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.text.TextUtils
 import com.example.allmysound.Main.Model.SongInfo
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -13,6 +14,7 @@ private const val SHUFFLE = "Shuffle"
 private const val ROTATE = "Rotate"
 private const val LIKE = "Like"
 private const val SONGINFO = "IsPlayingNow"
+private const val PLAYLIST = "Playlist"
 
 class MySharedPreference(private var context: Context) {
 
@@ -52,5 +54,19 @@ class MySharedPreference(private var context: Context) {
     fun getIsPlayingInfo(): SongInfo?{
         val str = prefs.getString(SONGINFO,null)
         return if (str == null) null else Gson().fromJson(str)
+    }
+    fun setPlayListInt(playlist: ArrayList<Int>){
+        val mIntList   = playlist.toArray()
+        editor.putString(PLAYLIST,TextUtils.join(",=,",mIntList)).apply()
+    }
+    fun getPlayListInt():ArrayList<Int>{
+        val mList = TextUtils.split(prefs.getString(PLAYLIST,""),",=,")
+        val arrayToList = ArrayList<String>(mList.toList())
+        val newList = ArrayList<Int>()
+
+        arrayToList.forEach {
+            newList.add(it.toInt())
+        }
+        return  newList
     }
 }
