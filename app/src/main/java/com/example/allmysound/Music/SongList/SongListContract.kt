@@ -1,5 +1,6 @@
 package com.example.allmysound.Music.SongList
 
+import android.content.Context
 import com.example.allmysound.Base.BaseContract
 import com.example.allmysound.Main.Model.SongInfo
 
@@ -13,10 +14,7 @@ interface SongListContract {
         /**Presenter : 전달자로서 VIew에 표시될 데이터를 Model에서 가져와 VIew에  전달*/
 
         override fun setView(view: View)
-
         override fun releaseView()
-
-        fun loadSong():ArrayList<SongInfo>
 
     }
 }

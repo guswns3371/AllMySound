@@ -15,6 +15,7 @@ private const val ROTATE = "Rotate"
 private const val LIKE = "Like"
 private const val SONGINFO = "IsPlayingNow"
 private const val PLAYLIST = "Playlist"
+private const val ALLSONGLIST = "Allsonglist"
 
 class MySharedPreference(private var context: Context) {
 
@@ -69,4 +70,5 @@ class MySharedPreference(private var context: Context) {
         }
         return  newList
     }
+
 }

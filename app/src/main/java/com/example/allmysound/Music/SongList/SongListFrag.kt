@@ -2,6 +2,7 @@ package com.example.allmysound.Music.SongList
 
 import android.Manifest
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.LinearSmoothScroller
 import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.R
 import com.example.allmysound.Main.Model.SongInfo
@@ -28,8 +28,22 @@ class SongListFrag: Fragment(),SongListContract.View {
     private lateinit var linearLayoutManager : LinearLayoutManager
     private lateinit var songInfos : ArrayList<SongInfo>
 
+    override fun onPause() {
+        Log.e("FragLifeCycle","SongListFrag_onPause")
+        super.onPause()
+    }
+    override fun onDestroyView() {
+        Log.e("FragLifeCycle","SongListFrag_onDestroyView")
+        super.onDestroyView()
+    }
+    override fun onDestroy() {
+        Log.e("FragLifeCycle","SongListFrag_onDestroy")
+        super.onDestroy()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_songlist,container,false)
+        Log.e("FragLifeCycle","SongListFrag_onCreateView")
 
         mRecyclerView = view.findViewById(R.id.songlist_RV)
         mFastScrollView = view.findViewById(R.id.fastscroller)
@@ -66,18 +80,24 @@ class SongListFrag: Fragment(),SongListContract.View {
     fun initPresenter(){
         presenter = SongListPresenter(activity!!)
         presenter.setView(this)
-        songInfos = presenter.loadSong()
+        songInfos = presenter.loadDataByQuery(activity!!,
+            MediaStore.Audio.Media.IS_MUSIC +" != 0",
+            MediaStore.Audio.AudioColumns.TITLE)
     }
     fun initRecyclerView(){
         val myAdapter = SongListAdapter(activity!!,songInfos)
         myAdapter.mClickListener = object : SongListAdapter.SongListClickListener{
             override fun onClick(pos: Int) {
-                MainActivity.createMainPresenter().linkDataIndex(pos)
+                MainActivity.createMainPresenter().SonglinkData(songInfos)
+                MainActivity.createMainPresenter().SonglinkDataIndex(pos)
                 MainActivity.createMainPresenter().checkIsPlaying()
                 MainActivity.createMainPresenter().setRandomIdx_NumList()
             }
         }
-        MainActivity.createMainPresenter().linkData(songInfos,myAdapter)
+        if(MainActivity.createMainPresenter().isNewState)  // 앱이 처음 실행되었을때 만 songlist를 연결
+            MainActivity.createMainPresenter().SonglinkData(songInfos)
+
+        MainActivity.createMainPresenter().SonglinkAdapter(myAdapter)
         mRecyclerView.adapter = myAdapter
         mRecyclerView.layoutManager=linearLayoutManager
         mRecyclerView.setHasFixedSize(true)

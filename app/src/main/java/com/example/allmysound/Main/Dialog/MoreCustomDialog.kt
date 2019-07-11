@@ -25,6 +25,7 @@ class MoreCustomDialog(context: Context) : Dialog(context) {
         fun clickInfo()
         fun clickPlaylist()
         fun clickPlaylistAdd()
+        fun clickArtistInfo()
         fun clickDelete()
         fun clickCancel()
         fun clickShuffle()
@@ -67,6 +68,7 @@ class MoreCustomDialog(context: Context) : Dialog(context) {
             more_info.setOnClickListener { mClickListener!!.clickInfo() }
             more_playlist.setOnClickListener { mClickListener!!.clickPlaylist() }
             more_playlist_add.setOnClickListener { mClickListener!!.clickPlaylistAdd() }
+            more_artistinfo.setOnClickListener { mClickListener!!.clickArtistInfo() }
             more_delete.setOnClickListener { mClickListener!!.clickDelete() }
             more_cancel_btn.setOnClickListener { mClickListener!!.clickCancel() }
             cshuffle_btn.setOnClickListener {mClickListener!!.clickShuffle() ; setPlayListRV()}
@@ -94,11 +96,14 @@ class MoreCustomDialog(context: Context) : Dialog(context) {
         myCPlayListAdapter = CPlayListAdapter(context,songlist)
         myCPlayListAdapter!!.mClickListener = object : CPlayListAdapter.CustomPlayListClickListener{
             override fun onItemClick(pos: Int) {
+                MainActivity.createMainPresenter().PlaylistllinkData(songlist)
                 MainActivity.createMainPresenter().PlaylistllinkDataIndex(pos)
                 MainActivity.createMainPresenter().checkIsPlaying()
             }
         }
-        MainActivity.createMainPresenter().PlaylistllinkData(myCPlayListAdapter!!)
+        MainActivity.createMainPresenter().PlaylistllinkData(songlist)
+        MainActivity.createMainPresenter().PlaylistlinkAdapter(myCPlayListAdapter!!)
+
         playlist_RV.adapter = myCPlayListAdapter
         playlist_RV.layoutManager= LinearLayoutManager(context)
         playlist_RV.setHasFixedSize(true)

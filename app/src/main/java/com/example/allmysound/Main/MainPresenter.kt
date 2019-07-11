@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.SeekBar
 import com.example.allmysound.Main.Dialog.Adapter.CPlayListAdapter
 import com.example.allmysound.Main.Model.SongInfo
+import com.example.allmysound.Music.InfoPage.AlbumInfo.Adapter.AlbumInfoAdapter
 import com.example.allmysound.Music.SongList.SongListAdapter
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import java.lang.Exception
@@ -16,12 +17,12 @@ class MainPresenter: MainContract.Presenter {
 
     private lateinit var view : MainContract.View
     private lateinit var songListAdapter :SongListAdapter
-    private lateinit var cplayListAdapter :CPlayListAdapter
+    private var cplayListAdapter :CPlayListAdapter? = null
+    private var albumInfoAdapter :AlbumInfoAdapter? = null
     private var songInfolist: ArrayList<SongInfo>? =null
     private var numList: ArrayList<Int>? =  null
 //    private var songInfo: SongInfo? =null
-    private var isNewState : Boolean = true
-    private var isPlayListState : Boolean = false
+     var isNewState : Boolean = true
     private var idx: Int =0
     private var randomIdx: Int =-1
     private var mp :  MediaPlayer = MediaPlayer()
@@ -29,25 +30,31 @@ class MainPresenter: MainContract.Presenter {
     override fun getSongList(): ArrayList<SongInfo> = songInfolist!!
     override fun getPlayList() :  ArrayList<Int> = numList!!
 
-    override fun linkData(songInfolist:  ArrayList<SongInfo>, songListAdapter: SongListAdapter) {
-        this.songInfolist = songInfolist
+    /**SongListAdapter*/
+    override fun SonglinkData(songInfolist:  ArrayList<SongInfo>) {
+            this.songInfolist = songInfolist
+    }
+
+    override fun SonglinkAdapter(songListAdapter: SongListAdapter) {
         this.songListAdapter = songListAdapter
         numList = getNumList()
     }
-    override fun linkDataIndex(idx: Int) {
+    override fun SonglinkDataIndex(idx: Int) {
         this.idx = idx
         SaveLoadPrepareStart()
         isNewState= false
-        isPlayListState = false
     }
-
-    override fun linkDataUpdateIndex(idx: Int) {
+    override fun SonglinkDataUpdateIndex(idx: Int) {
         this.idx = idx
     }
 
-    override fun PlaylistllinkData(cplayListAdapter: CPlayListAdapter) {
+    /**CPlayListAdapter*/
+    override fun PlaylistllinkData(songInfolist:  ArrayList<SongInfo>) {
+        this.songInfolist = songInfolist
+    }
+
+    override fun PlaylistlinkAdapter(cplayListAdapter: CPlayListAdapter) {
         this.cplayListAdapter = cplayListAdapter
-        isPlayListState = true
     }
     override fun PlaylistllinkDataIndex(randomIdx: Int) {
         this.randomIdx = randomIdx
@@ -56,26 +63,48 @@ class MainPresenter: MainContract.Presenter {
         SaveLoadPrepareStart()
         songListAdapter.notifyDataSetChanged()
     }
-
     override fun PlaylistllinkDataUpdateIndex(randomIdx: Int) {
         this.randomIdx = randomIdx
     }
 
+    /**AlbumInfoAdapter*/
+    override fun AlbumlinkData(datalist: ArrayList<SongInfo>) {
+        this.songInfolist = datalist
+    }
+
+    override fun AlbumlinkAdapter(albumInfoAdapter: AlbumInfoAdapter) {
+        this.albumInfoAdapter = albumInfoAdapter
+    }
+    override fun AlbumlinkDataIndex(idx: Int) {
+        this.idx = idx
+        SaveLoadPrepareStart()
+    }
+    override fun AlbumlinkDataUpdateIndex(idx: Int) {
+        this.idx = idx
+    }
+
+
+
+
+
+
+
+    /**********************************************************/
     private fun SaveLoadPrepareStart(){
         saveData()
-        loadData()
+        getASongData()
         prepareMusic()
         startMusic()
     }
     private fun SaveLoadPrepare(){
         saveData()
-        loadData()
+        getASongData()
         prepareMusic()
     }
     override fun saveData() {
         MainActivity.prefs.setIsPlayingInfo(songInfolist!![idx])
     }
-    override fun loadData() {
+    override fun getASongData() {
         val songInfo =  MainActivity.prefs.getIsPlayingInfo()
         if (songInfo != null) {
             view.setSongAlbum(songInfo.album)
@@ -224,9 +253,8 @@ class MainPresenter: MainContract.Presenter {
     }
 
     override fun moreBtnClicked() {
-        val songInfo =  MainActivity.prefs.getIsPlayingInfo()
-        Log.e("moreBtnClicked ",songInfo.toString())
-        view.showMoreBtn(songInfo!!)
+        Log.e("moreBtnClicked ",MainActivity.prefs.getIsPlayingInfo().toString())
+        view.showMoreBtn()
     }
     override fun playBtnClicked() {
         if(MainActivity.prefs.getPlayBoolean()){
@@ -311,8 +339,10 @@ class MainPresenter: MainContract.Presenter {
 
     private fun notifyAdapters(){
         songListAdapter.notifyDataSetChanged()
-        if(isPlayListState)
-            cplayListAdapter.notifyDataSetChanged()
+        if(cplayListAdapter!=null)
+            cplayListAdapter!!.notifyDataSetChanged()
+        if(albumInfoAdapter!=null)
+            albumInfoAdapter!!.notifyDataSetChanged()
     }
 
     fun setRandomIdx_NumList(){

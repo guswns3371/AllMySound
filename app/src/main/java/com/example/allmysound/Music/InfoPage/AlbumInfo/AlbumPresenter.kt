@@ -1,4 +1,4 @@
-package com.example.allmysound.Music.SongList
+package com.example.allmysound.Music.InfoPage.AlbumInfo
 
 import android.annotation.SuppressLint
 import android.content.ContentUris
@@ -10,11 +10,11 @@ import com.example.allmysound.Main.Model.SongInfo
 import java.io.FileNotFoundException
 import java.io.IOException
 
-class SongListPresenter(private var context: Context?):SongListContract.Presenter {
+class AlbumPresenter(private var context: Context?): AlbumContract.Presenter {
 
-    private var view: SongListContract.View?=null
+    private lateinit var view : AlbumContract.View
 
-    override fun setView(view: SongListContract.View) {
+    override fun setView(view: AlbumContract.View) {
         this.view = view
     }
 

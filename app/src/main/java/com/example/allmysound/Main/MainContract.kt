@@ -1,10 +1,14 @@
 package com.example.allmysound.Main
 
+import android.content.Context
+import android.os.Bundle
 import android.widget.SeekBar
 import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.Fragment
 import com.example.allmysound.Base.BaseContract
 import com.example.allmysound.Main.Dialog.Adapter.CPlayListAdapter
 import com.example.allmysound.Main.Model.SongInfo
+import com.example.allmysound.Music.InfoPage.AlbumInfo.Adapter.AlbumInfoAdapter
 import com.example.allmysound.Music.SongList.SongListAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
@@ -12,14 +16,14 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout
 interface MainContract {
     interface View:BaseContract.View{
         override fun showToast(message: String)
+
         fun setToolbar(toolbar: Toolbar)
-        fun connectFragments(view : BottomNavigationView)
+        fun moveToFragment(frag: Fragment,key : String?,data:String?)
+        fun connectMusicFragment()
         fun setControllerAlpha(distance:Float)
         fun setImageSize(distance:Float)
-        fun setBNVHeight(distance:Float)
-        fun setBNVSize(distance:Float)
 
-        fun showMoreBtn(songInfo: SongInfo)
+        fun showMoreBtn()
         fun setSongTitle(text:String)
         fun setSongInnerTitle(text:String)
         fun setSongAlbum(text:String)
@@ -44,15 +48,25 @@ interface MainContract {
         override fun setView(view: View)
         override fun releaseView()
 
-        fun linkData(songInfolist: ArrayList<SongInfo>, songListAdapter: SongListAdapter)
-        fun linkDataIndex(idx : Int)
-        fun linkDataUpdateIndex(idx : Int)
+        /**SongListAdapter*/
+        fun SonglinkData(songInfolist: ArrayList<SongInfo>)
+        fun SonglinkAdapter(songListAdapter: SongListAdapter)
+        fun SonglinkDataIndex(idx : Int)
+        fun SonglinkDataUpdateIndex(idx : Int)
 
-        fun PlaylistllinkData(cplayListAdapter: CPlayListAdapter)
+        /**CPlayListAdapter*/
+        fun PlaylistllinkData(songInfolist:  ArrayList<SongInfo>)
+        fun PlaylistlinkAdapter(cplayListAdapter: CPlayListAdapter)
         fun PlaylistllinkDataIndex(randomIdx : Int)
         fun PlaylistllinkDataUpdateIndex(randomIdx : Int)
 
-        fun loadData()
+        /**AlbumInfoAdapter*/
+        fun AlbumlinkData(datalist: ArrayList<SongInfo>)
+        fun AlbumlinkAdapter(albumInfoAdapter: AlbumInfoAdapter)
+        fun AlbumlinkDataIndex(idx : Int)
+        fun AlbumlinkDataUpdateIndex(idx : Int)
+
+        fun getASongData()
         fun getSongList() :  ArrayList<SongInfo>
         fun getPlayList() :  ArrayList<Int>
         fun loadSetting()

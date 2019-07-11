@@ -8,7 +8,7 @@ import com.example.allmysound.Music.SongList.SongListFrag
 
 class MusicFragPagerAdapter(fragmentManager: FragmentManager?) :
     FragmentStatePagerAdapter(fragmentManager) {
-    private var tabTitles =  arrayOf("좋아요", "플레이리스트","노래")
+    private var tabTitles =  arrayOf("노래", "플레이리스트","좋아요")
     override fun getItem(p0: Int): androidx.fragment.app.Fragment? {
         return when (p0){
             0->  SongListFrag()

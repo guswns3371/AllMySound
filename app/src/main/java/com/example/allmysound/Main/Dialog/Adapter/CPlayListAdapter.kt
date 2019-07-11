@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -16,7 +15,6 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.R
-import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -105,7 +103,7 @@ class CPlayListAdapter (
             MainActivity.presenter.PlaylistllinkDataUpdateIndex(
             numlist.indexOf(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)) // randomIdx를 업데이트 한다
         else
-            MainActivity.presenter.linkDataUpdateIndex(
+            MainActivity.presenter.SonglinkDataUpdateIndex(
                 numlist.indexOf(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)) // Idx를 업데이트 한다
 
         notifyItemMoved(oldPos,newPos)

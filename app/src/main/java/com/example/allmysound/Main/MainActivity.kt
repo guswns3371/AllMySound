@@ -17,15 +17,15 @@ import com.example.allmysound.Search.SearchFrag
 import kotlinx.android.synthetic.main.activity_main.*
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.appcompat.widget.Toolbar
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.music_playing.*
 import android.widget.SeekBar
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.eightbitlab.supportrenderscriptblur.SupportRenderScriptBlur
 import com.example.allmysound.Main.Dialog.MoreCustomDialog
-import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.Main.Pref.MySharedPreference
+import com.example.allmysound.Music.InfoPage.AlbumInfo.AlbumInfoFrag
+import com.example.allmysound.Music.InfoPage.ArtistInfo.ArtistInfoFrag
 import com.example.allmysound.R
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
@@ -40,11 +40,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         lateinit var prefs: MySharedPreference
 
         var presenter: MainPresenter = MainPresenter()
-        fun createMainPresenter() : MainPresenter =
-            presenter
+        fun createMainPresenter() : MainPresenter = presenter
     }
-
-    private lateinit var customDialog : MoreCustomDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,12 +50,12 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         blurry()
         prefs = MySharedPreference(this)
         Permission()
-        presenterSetting()
+        initPresenter()
         setToolbar(main_toolbar)
-        connectFragments(BtmNavView)
+        connectMusicFragment()
         initVolumeControl()
         textviewScrolling()
-        setClickListners()
+        setClickListeners()
     }
 
     override fun setMusicSeekBarMax(max: Int) {
@@ -83,21 +80,21 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     }
 
-    fun setClickListners(){
+    fun setClickListeners(){
         dragView.setOnClickListener {
-            if (sliding_layout.panelState !=SlidingUpPanelLayout.PanelState.EXPANDED
-                && sliding_layout.panelState !=SlidingUpPanelLayout.PanelState.ANCHORED){
-                if (sliding_layout.anchorPoint < 1.0f)
-                    sliding_layout.panelState = SlidingUpPanelLayout.PanelState.ANCHORED
-                else
-                    sliding_layout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
-            }
+//            if (sliding_layout.panelState !=SlidingUpPanelLayout.PanelState.EXPANDED
+//                && sliding_layout.panelState !=SlidingUpPanelLayout.PanelState.ANCHORED){
+//                if (sliding_layout.anchorPoint < 1.0f)
+//                    sliding_layout.panelState = SlidingUpPanelLayout.PanelState.ANCHORED
+//                else
+//                    sliding_layout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
+//            }
         }
         ctr_play.setOnClickListener { presenter.playBtnClicked() }
         ctr_next.setOnClickListener {  presenter.nextBtnClicked() }
         music_control.setOnLongClickListener {
             if (sliding_layout.panelState !=SlidingUpPanelLayout.PanelState.EXPANDED)
-            showToast("music_control")
+                presenter.moreBtnClicked()
             true }
         music_control.setOnClickListener { sliding_layout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED }
         ctr_cover_cv.setOnClickListener {
@@ -118,21 +115,21 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         song_title_.isSelected =true
         song_album.isSelected =true
     }
-    fun presenterSetting(){
+    fun initPresenter(){
         presenter.setView(this)
         presenter.slidingPanelLayoutListener(sliding_layout)
-        presenter.loadData()
+        presenter.getASongData()
         presenter.loadSetting()
 
     }
     fun Permission(){
         val permissionlistener = object : PermissionListener {
             override fun onPermissionGranted() {
-                Log.e("Songlist_Permission", "Permission Granted")
+                Log.e("MainActivity_Permission", "Permission Granted")
             }
 
             override fun onPermissionDenied(deniedPermissions: List<String>) {
-                Log.e("Songlist_Permission", "Permission Denied$deniedPermissions")
+                Log.e("MainActivity_Permission", "Permission Denied$deniedPermissions")
             }
         }
         TedPermission.with(this)
@@ -182,12 +179,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 volume_seekbar.progress -=1
                 return true
             }
-            KeyEvent.KEYCODE_BACK -> return true
+            KeyEvent.KEYCODE_BACK ->{
+                return true
+            }
         }
-
         return false
     }
-
+    /**onBackPressed 메소드 대신 사용함*/
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_UP -> {
@@ -198,7 +196,19 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 return true
             }
             KeyEvent.KEYCODE_BACK -> {
-                this.finish()
+                Log.e("backStackEntryCount","${supportFragmentManager.backStackEntryCount}")
+                when {
+                    sliding_layout.panelState ==SlidingUpPanelLayout.PanelState.EXPANDED ->
+                        sliding_layout.panelState =SlidingUpPanelLayout.PanelState.COLLAPSED
+                    supportFragmentManager.backStackEntryCount >1 ->
+                        supportFragmentManager.popBackStackImmediate()
+                    supportFragmentManager.backStackEntryCount ==1 ->{
+                        supportFragmentManager.popBackStackImmediate()
+                        connectMusicFragment()
+                    }
+
+                    else -> this.finish()
+                }
                 return true
             }
         }
@@ -214,17 +224,16 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun setSongAlbum(text:String) {
         song_album.text = text
     }
-
     override fun setSongArtist(text: String) {
         song_artist.text = text
     }
-    @SuppressLint("SetTextI18n")
     override fun setSongTime(text:String) {
         val timeLong = text.toLong()
         val min = TimeUnit.MILLISECONDS.toMinutes(timeLong)
         val sec = TimeUnit.MILLISECONDS.toSeconds(timeLong) - min*60
         val secStr = if (sec<10)  "0$sec" else  "$sec"
-        remain_time.text = "$min:$secStr"
+        val time = "$min:$secStr"
+        remain_time.text = time
     }
     override fun setSongAlbumArt(uri: String){
         Picasso.get()
@@ -233,22 +242,36 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             .into(ctr_cover)
     }
 
-    override fun showMoreBtn(songInfo: SongInfo){
-        customDialog= MoreCustomDialog(this)
-
+    override fun showMoreBtn(){
+        initCustomDialog()
+    }
+    private fun initCustomDialog(){
+        val customDialog= MoreCustomDialog(this)
         customDialog.setSongList(presenter.getSongList())
-
+        val songInfo = MainActivity.prefs.getIsPlayingInfo()!!
         customDialog.mSetData = object : MoreCustomDialog.SetData {
-            override fun setImage(): String = MainActivity.prefs.getIsPlayingInfo()!!.img
-            override fun setTitle(): String  =  MainActivity.prefs.getIsPlayingInfo()!!.title
-            override fun setArtist(): String =  MainActivity.prefs.getIsPlayingInfo()!!.artist
-            override fun setAlbum(): String =  MainActivity.prefs.getIsPlayingInfo()!!.album
+            override fun setImage(): String = songInfo.img
+            override fun setTitle(): String  =  songInfo.title
+            override fun setArtist(): String =  songInfo.artist
+            override fun setAlbum(): String =  songInfo.album
         }
+
         customDialog.mClickListener = object: MoreCustomDialog.ClickListener {
             override fun clickInfo() {
-                showToast("clickInfo")
+                customDialog.cancel()
+                sliding_layout.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
+                moveToFragment(
+                    AlbumInfoFrag(),
+                    AlbumInfoFrag().DATA_RECEIVE,songInfo.album)
             }
 
+            override fun clickArtistInfo() {
+                customDialog.cancel()
+                sliding_layout.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
+                moveToFragment(
+                    ArtistInfoFrag(),
+                    ArtistInfoFrag().DATA_RECEIVE,songInfo.artist)
+            }
             override fun clickPlaylist() {
                 customDialog.showPlayList()
             }
@@ -275,7 +298,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                 presenter.shuffleBtnClicked()
             }
         }
-//        customDialog.setCancelable(false)
         customDialog.show()
         //다이얼로그 크기 , 위치, 모양
         customDialog.window?.setLayout(
@@ -316,18 +338,17 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun showToast(message: String) {
         Toast.makeText(this,message,Toast.LENGTH_SHORT).show()
     }
-    override fun connectFragments(view : BottomNavigationView){
-        view.setOnNavigationItemSelectedListener {
-            var selectedFrag : Fragment? =null
-            when(it.itemId){
-                R.id.menu_Music -> selectedFrag = MusicFrag()
-                R.id.menu_Recommended -> selectedFrag = RecommendFrag()
-                R.id.menu_Search -> selectedFrag = SearchFrag()
-            }
-            supportFragmentManager.beginTransaction().replace(R.id.frag_container,selectedFrag!!).commit()
-            true
-        }
+    override fun connectMusicFragment(){
         supportFragmentManager.beginTransaction().replace(R.id.frag_container, MusicFrag()).commit()
+    }
+
+    override fun moveToFragment(frag: Fragment,key : String?,data:String?) {
+        key?.let{
+            val args = Bundle()
+            args.putString(it,data)
+            frag.arguments = args
+        }
+        supportFragmentManager.beginTransaction().replace(R.id.frag_container, frag).addToBackStack(null).commit()
     }
     override fun setToolbar(toolbar: Toolbar){
         setSupportActionBar(toolbar)
@@ -361,18 +382,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun setBNVHeight(distance:Float){
-        val originalHeight = 196
-        val height= (originalHeight.toFloat())-( (originalHeight.toFloat())*((10000.0f-distance*10000.0f)/10000.0f) )
-        BtmNavView.animate()
-            .translationY(height)
-            .duration=0
-    }
-    override fun setBNVSize(distance:Float){
-        val originalHeight = 196
-        BtmNavView.requestLayout()
-        BtmNavView.layoutParams.height =  ( (originalHeight.toFloat())*((10000.0f-distance*10000.0f)/10000.0f) ).toInt()
-    }
     override fun setControllerAlpha(distance:Float){
         val alphaValue = (10000.0f-distance*40000.0f)
         music_control_two.animate()

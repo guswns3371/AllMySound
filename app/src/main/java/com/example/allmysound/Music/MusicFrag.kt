@@ -2,6 +2,8 @@ package com.example.allmysound.Music
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,11 +18,25 @@ class MusicFrag: Fragment(){
     private lateinit var tabs: TabLayout
     private lateinit var viewpager: ViewPager
 
+    override fun onPause() {
+        Log.e("FragLifeCycle","MusicFrag_onPause")
+        super.onPause()
+    }
+    override fun onDestroyView() {
+        Log.e("FragLifeCycle","MusicFrag_onDestroyView")
+        super.onDestroyView()
+    }
+    override fun onDestroy() {
+        Log.e("FragLifeCycle","MusicFrag_onDestroy")
+        super.onDestroy()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_music,container,false)
-
+        Log.e("FragLifeCycle","MusicFrag_onCreateView")
          tabs = view.findViewById(R.id.tabs)
          viewpager = view.findViewById(R.id.viewPager)
+
          viewpagerInit()
 
         return view

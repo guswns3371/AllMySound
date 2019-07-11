@@ -19,7 +19,6 @@ import kotlinx.android.synthetic.main.songlist_item.view.*
 class SongListAdapter (
     private val context: Context,
     private val songlist: ArrayList<SongInfo>
-//    , val itemClick : (song: SongInfo,idx: Int) -> Unit
 ): androidx.recyclerview.widget.RecyclerView.Adapter<SongListAdapter.MyViewHolder>()  {
 
     interface SongListClickListener{

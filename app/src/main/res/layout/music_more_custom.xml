@@ -106,6 +106,23 @@
             </LinearLayout>
             <View
                     android:layout_width="match_parent"
+                    android:layout_height="1dp" android:id="@+id/view6" android:background="#3E000000"/>
+            <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:padding="20dp" android:id="@+id/more_artistinfo">
+                <TextView
+                        android:text="아티스트로 이동"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" android:id="@+id/textView88" android:layout_weight="1"
+                        android:gravity="center_vertical" android:textColor="@color/black" android:textSize="18sp"/>
+                <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp" app:srcCompat="@drawable/artist" android:id="@+id/imageView66"
+                        android:layout_weight="0" android:padding="3dp"/>
+            </LinearLayout>
+            <View
+                    android:layout_width="match_parent"
                     android:layout_height="1dp" android:id="@+id/view2" android:background="#3E000000"/>
             <LinearLayout
                     android:orientation="horizontal"
@@ -144,8 +161,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" android:id="@+id/playlist_RV" android:visibility="visible"
                 android:layout_weight="1"/>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                      android:layout_weight="1">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="55dp"
+        >
 
             <ImageView
                     android:layout_width="wrap_content"
