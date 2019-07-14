@@ -35,14 +35,42 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginEnd="5dp"
                 android:layout_marginStart="5dp" android:layout_weight="1">
-            <TextView
-                    android:text="TextView"
+            <LinearLayout
+                    android:orientation="vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" android:id="@+id/csong_title" android:textSize="17sp"
-                    android:layout_marginBottom="2dp" android:textColor="#000000" android:singleLine="true"
-                    android:ellipsize="end"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="2dp"
 
-            />
+                    android:layout_weight="1">
+                <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent">
+
+                    <LinearLayout
+                            android:orientation="vertical"
+                            android:layout_width="match_parent"
+                            android:layout_gravity="bottom"
+                            android:layout_height="@dimen/underline_height" android:background="@color/pointColor"
+                            android:visibility="invisible"
+                            android:id="@+id/csong_underline">
+                    </LinearLayout>
+                    <TextView
+                            android:text="TextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" android:id="@+id/csong_title" android:textSize="17sp"
+                            android:textColor="#000000"
+
+                            android:focusable="true"
+                            android:focusableInTouchMode="true"
+                            android:singleLine="true"
+                            android:scrollHorizontally="true"
+                            android:ellipsize="marquee"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:layout_gravity="center_vertical"
+
+                    />
+                </FrameLayout>
+            </LinearLayout>
             <TextView
                     android:text="TextView"
                     android:layout_width="match_parent"

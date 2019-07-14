@@ -18,8 +18,8 @@ interface MainContract {
         override fun showToast(message: String)
 
         fun setToolbar(toolbar: Toolbar)
-        fun moveToFragment(frag: Fragment,key : String?,data:String?)
-        fun connectMusicFragment()
+        fun moveToFragment(frag: Fragment,key : String?,data:SongInfo)
+        fun connectFragment(frag: Fragment)
         fun setControllerAlpha(distance:Float)
         fun setImageSize(distance:Float)
 
@@ -48,27 +48,24 @@ interface MainContract {
         override fun setView(view: View)
         override fun releaseView()
 
+        fun LinkDataList(songInfolist: ArrayList<SongInfo>)
+        fun LinkAdapter(Adapter: Any)
         /**SongListAdapter*/
-        fun SonglinkData(songInfolist: ArrayList<SongInfo>)
-        fun SonglinkAdapter(songListAdapter: SongListAdapter)
         fun SonglinkDataIndex(idx : Int)
         fun SonglinkDataUpdateIndex(idx : Int)
 
         /**CPlayListAdapter*/
-        fun PlaylistllinkData(songInfolist:  ArrayList<SongInfo>)
-        fun PlaylistlinkAdapter(cplayListAdapter: CPlayListAdapter)
         fun PlaylistllinkDataIndex(randomIdx : Int)
         fun PlaylistllinkDataUpdateIndex(randomIdx : Int)
 
         /**AlbumInfoAdapter*/
-        fun AlbumlinkData(datalist: ArrayList<SongInfo>)
-        fun AlbumlinkAdapter(albumInfoAdapter: AlbumInfoAdapter)
         fun AlbumlinkDataIndex(idx : Int)
-        fun AlbumlinkDataUpdateIndex(idx : Int)
+
+        /**ArtistInfoAdapter*/
+        fun ArtistIlinkDataIndex(idx : Int)
 
         fun getASongData()
         fun getSongList() :  ArrayList<SongInfo>
-        fun getPlayList() :  ArrayList<Int>
         fun loadSetting()
         fun saveData()
         fun getMusicSeekBarNTime()

@@ -88,16 +88,16 @@ class SongListFrag: Fragment(),SongListContract.View {
         val myAdapter = SongListAdapter(activity!!,songInfos)
         myAdapter.mClickListener = object : SongListAdapter.SongListClickListener{
             override fun onClick(pos: Int) {
-                MainActivity.createMainPresenter().SonglinkData(songInfos)
+                MainActivity.createMainPresenter().LinkDataList(songInfos)
                 MainActivity.createMainPresenter().SonglinkDataIndex(pos)
                 MainActivity.createMainPresenter().checkIsPlaying()
-                MainActivity.createMainPresenter().setRandomIdx_NumList()
+                MainActivity.createMainPresenter().setRandomIdxNumList()
             }
         }
         if(MainActivity.createMainPresenter().isNewState)  // 앱이 처음 실행되었을때 만 songlist를 연결
-            MainActivity.createMainPresenter().SonglinkData(songInfos)
+            MainActivity.createMainPresenter().LinkDataList(songInfos)
 
-        MainActivity.createMainPresenter().SonglinkAdapter(myAdapter)
+        MainActivity.createMainPresenter().LinkAdapter(myAdapter)
         mRecyclerView.adapter = myAdapter
         mRecyclerView.layoutManager=linearLayoutManager
         mRecyclerView.setHasFixedSize(true)

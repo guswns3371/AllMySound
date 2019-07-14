@@ -49,28 +49,34 @@ class AlbumInfoFrag: Fragment() , AlbumContract.View {
     private fun initPresenter(){
         presenter = AlbumPresenter(activity!!)
         presenter.setView(this)
+
+        val songinfo = getFragArgs()
+        val query = MediaStore.Audio.Media.ALBUM +" == '${songinfo.album.replace("'","''")}' "+
+                " and "+ MediaStore.Audio.Media.ARTIST +" == '${songinfo.artist.replace("'","''")}' "
+        val orderBy = MediaStore.Audio.AudioColumns.TRACK+" ASC"
+
         datalist=  presenter.loadDataByQuery(activity!!,
-            MediaStore.Audio.Media.ALBUM +" == '${getFragIntent()}' ",
-            MediaStore.Audio.AudioColumns.TRACK)
+            query,
+            orderBy )
     }
 
     private fun initRecyclerView(){
         val mAdapter = AlbumInfoAdapter(activity!!,datalist)
         mAdapter.mClickListener = object  : AlbumInfoAdapter.AlbumInfoClickListener{
             override fun onClick(pos: Int) {
-                MainActivity.createMainPresenter().AlbumlinkData(datalist)
+                MainActivity.createMainPresenter().LinkDataList(datalist)
                 MainActivity.createMainPresenter().AlbumlinkDataIndex(pos)
                 MainActivity.createMainPresenter().checkIsPlaying()
-                MainActivity.createMainPresenter().setRandomIdx_NumList()
+                MainActivity.createMainPresenter().setRandomIdxNumList()
             }
         }
-        MainActivity.createMainPresenter().AlbumlinkAdapter(mAdapter)
+        MainActivity.createMainPresenter().LinkAdapter(mAdapter)
 
         mRecyclerView.adapter = mAdapter
         mRecyclerView.layoutManager=linearLayoutManager
         mRecyclerView.setHasFixedSize(true)
     }
-    override fun getFragIntent(): String? =arguments!!.getString(DATA_RECEIVE)
+    override fun getFragArgs(): SongInfo =arguments!!.getSerializable(DATA_RECEIVE) as SongInfo
     override fun showToast(message: String) {
         Toast.makeText(activity!!, message,Toast.LENGTH_SHORT).show()
     }

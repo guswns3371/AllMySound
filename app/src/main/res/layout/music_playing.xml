@@ -179,16 +179,16 @@
                                 android:layout_height="wrap_content" android:id="@+id/song_artist"
 
                                 android:textSize="14sp"
-                                android:textColor="#E91E63" android:paddingStart="15dp"
-                                android:paddingEnd="20dp"
+                                android:textColor="#E91E63"
 
                                 android:focusable="true"
                                 android:focusableInTouchMode="true"
                                 android:singleLine="true"
                                 android:scrollHorizontally="true"
                                 android:ellipsize="marquee"
-                                android:marqueeRepeatLimit="marquee_forever" android:paddingTop="3dp"
-                                android:paddingRight="7dp" android:paddingBottom="10dp"/>
+                                android:marqueeRepeatLimit="marquee_forever" android:layout_marginTop="3dp"
+                                android:layout_marginLeft="10dp" android:layout_marginBottom="10dp"
+                                android:background="@color/pointColor" android:padding="5dp"/>
                 </LinearLayout>
                 <LinearLayout
                         android:orientation="horizontal"

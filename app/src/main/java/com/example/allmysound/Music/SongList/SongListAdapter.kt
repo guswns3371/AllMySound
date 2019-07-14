@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.net.toUri
 import com.bumptech.glide.Glide
@@ -27,6 +28,7 @@ class SongListAdapter (
     var mClickListener: SongListClickListener? =null
 
     inner class MyViewHolder (itemView : View?) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView!!) {
+        val songunderline = itemView?.findViewById<LinearLayout>(R.id.song_underline)
         val songimg = itemView?.findViewById<ImageView>(R.id.song_img)
         val artistname = itemView?.findViewById<TextView>(R.id.song_artist)
         val songname = itemView?.findViewById<TextView>(R.id.song_title)
@@ -45,9 +47,11 @@ class SongListAdapter (
 
             if (MainActivity.prefs.getIsPlayingInfo()?.idx == song.idx){
                 playing_img?.visibility = View.VISIBLE
+                songunderline?.visibility = View.VISIBLE
                 songname?.typeface = Typeface.DEFAULT_BOLD
             } else{
                 playing_img?.visibility = View.INVISIBLE
+                songunderline?.visibility = View.INVISIBLE
                 songname?.typeface = Typeface.DEFAULT
             }
 

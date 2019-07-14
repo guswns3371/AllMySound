@@ -6,4 +6,5 @@
     <dimen name="sp_title">22sp</dimen>
     <dimen name="sp_album">18sp</dimen>
     <dimen name="sp_song">16sp</dimen>
+    <dimen name="underline_height">7dp</dimen>
 </resources>

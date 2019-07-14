@@ -96,13 +96,13 @@ class MoreCustomDialog(context: Context) : Dialog(context) {
         myCPlayListAdapter = CPlayListAdapter(context,songlist)
         myCPlayListAdapter!!.mClickListener = object : CPlayListAdapter.CustomPlayListClickListener{
             override fun onItemClick(pos: Int) {
-                MainActivity.createMainPresenter().PlaylistllinkData(songlist)
+                MainActivity.createMainPresenter().LinkDataList(songlist)
                 MainActivity.createMainPresenter().PlaylistllinkDataIndex(pos)
                 MainActivity.createMainPresenter().checkIsPlaying()
             }
         }
-        MainActivity.createMainPresenter().PlaylistllinkData(songlist)
-        MainActivity.createMainPresenter().PlaylistlinkAdapter(myCPlayListAdapter!!)
+        MainActivity.createMainPresenter().LinkDataList(songlist)
+        MainActivity.createMainPresenter().LinkAdapter(myCPlayListAdapter!!)
 
         playlist_RV.adapter = myCPlayListAdapter
         playlist_RV.layoutManager= LinearLayoutManager(context)

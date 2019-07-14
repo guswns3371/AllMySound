@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
@@ -30,6 +31,7 @@ class CPlayListAdapter (
     private val numlist: ArrayList<Int> = MainActivity.prefs.getPlayListInt()
 
     inner class MyViewHolder (itemView : View?) : RecyclerView.ViewHolder(itemView!!) {
+        val csongunderline = itemView?.findViewById<LinearLayout>(R.id.csong_underline)
         val csongimg = itemView?.findViewById<ImageView>(R.id.csong_img)
         val cartistname = itemView?.findViewById<TextView>(R.id.csong_artist)
         val csongname = itemView?.findViewById<TextView>(R.id.csong_title)
@@ -57,10 +59,12 @@ class CPlayListAdapter (
             if(numlist.indexOf(orderNum) == pos){
                 csongname?.typeface = Typeface.DEFAULT_BOLD
                 cplaying_img?.visibility = View.VISIBLE
+                csongunderline?.visibility = View.VISIBLE
                 cmoving_playlist?.visibility = View.GONE
             } else{
                 csongname?.typeface = Typeface.DEFAULT
                 cplaying_img?.visibility = View.GONE
+                csongunderline?.visibility = View.INVISIBLE
                 cmoving_playlist?.visibility = View.VISIBLE
             }
 

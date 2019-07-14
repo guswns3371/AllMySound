@@ -23,6 +23,7 @@ import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.eightbitlab.supportrenderscriptblur.SupportRenderScriptBlur
 import com.example.allmysound.Main.Dialog.MoreCustomDialog
+import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.Main.Pref.MySharedPreference
 import com.example.allmysound.Music.InfoPage.AlbumInfo.AlbumInfoFrag
 import com.example.allmysound.Music.InfoPage.ArtistInfo.ArtistInfoFrag
@@ -31,14 +32,12 @@ import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.squareup.picasso.Picasso
-import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity(), MainContract.View {
     companion object {
         @SuppressLint("StaticFieldLeak")
         lateinit var prefs: MySharedPreference
-
         var presenter: MainPresenter = MainPresenter()
         fun createMainPresenter() : MainPresenter = presenter
     }
@@ -52,7 +51,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         Permission()
         initPresenter()
         setToolbar(main_toolbar)
-        connectMusicFragment()
+        connectFragment(MusicFrag())
         initVolumeControl()
         textviewScrolling()
         setClickListeners()
@@ -100,8 +99,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         ctr_cover_cv.setOnClickListener {
             if (sliding_layout.panelState ==SlidingUpPanelLayout.PanelState.EXPANDED)
             showToast("ctr_cover") }
-        song_album.setOnClickListener { showToast("song_album") }
-        song_artist.setOnClickListener { showToast("song_artist") }
+        song_album.setOnClickListener { }
+        song_artist.setOnClickListener {goToArtistInfo()}
         more.setOnClickListener { presenter.moreBtnClicked() }
         play_pre.setOnClickListener { presenter.prevBtnClicked() }
         play.setOnClickListener { presenter.playBtnClicked()}
@@ -204,7 +203,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
                         supportFragmentManager.popBackStackImmediate()
                     supportFragmentManager.backStackEntryCount ==1 ->{
                         supportFragmentManager.popBackStackImmediate()
-                        connectMusicFragment()
+                        connectFragment(MusicFrag())
                     }
 
                     else -> this.finish()
@@ -228,12 +227,12 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         song_artist.text = text
     }
     override fun setSongTime(text:String) {
-        val timeLong = text.toLong()
-        val min = TimeUnit.MILLISECONDS.toMinutes(timeLong)
-        val sec = TimeUnit.MILLISECONDS.toSeconds(timeLong) - min*60
-        val secStr = if (sec<10)  "0$sec" else  "$sec"
-        val time = "$min:$secStr"
-        remain_time.text = time
+//        val timeLong = text.toLong()
+//        val min = TimeUnit.MILLISECONDS.toMinutes(timeLong)
+//        val sec = TimeUnit.MILLISECONDS.toSeconds(timeLong) - min*60
+//        val secStr = if (sec<10)  "0$sec" else  "$sec"
+//        val time = "$min:$secStr"
+        remain_time.text = text
     }
     override fun setSongAlbumArt(uri: String){
         Picasso.get()
@@ -259,18 +258,12 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         customDialog.mClickListener = object: MoreCustomDialog.ClickListener {
             override fun clickInfo() {
                 customDialog.cancel()
-                sliding_layout.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
-                moveToFragment(
-                    AlbumInfoFrag(),
-                    AlbumInfoFrag().DATA_RECEIVE,songInfo.album)
+                goToAlbumInfo()
             }
 
             override fun clickArtistInfo() {
                 customDialog.cancel()
-                sliding_layout.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
-                moveToFragment(
-                    ArtistInfoFrag(),
-                    ArtistInfoFrag().DATA_RECEIVE,songInfo.artist)
+                goToArtistInfo()
             }
             override fun clickPlaylist() {
                 customDialog.showPlayList()
@@ -306,6 +299,20 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         customDialog.window?.setGravity(Gravity.BOTTOM)
         customDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
+    private fun goToArtistInfo(){
+        val songInfo = MainActivity.prefs.getIsPlayingInfo()!!
+        moveToFragment(
+            ArtistInfoFrag(),
+            ArtistInfoFrag().DATA_RECEIVE,songInfo)
+        sliding_layout.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
+    }
+    private fun goToAlbumInfo(){
+        val songInfo = MainActivity.prefs.getIsPlayingInfo()!!
+        moveToFragment(
+            AlbumInfoFrag(),
+            AlbumInfoFrag().DATA_RECEIVE,songInfo)
+        sliding_layout.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
+    }
     override fun changePlayBtn(isPlay:Boolean){
         if (isPlay){
             play.setImageResource(R.drawable.pause)
@@ -338,14 +345,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun showToast(message: String) {
         Toast.makeText(this,message,Toast.LENGTH_SHORT).show()
     }
-    override fun connectMusicFragment(){
-        supportFragmentManager.beginTransaction().replace(R.id.frag_container, MusicFrag()).commit()
+    override fun connectFragment(frag: Fragment){
+        supportFragmentManager.beginTransaction().replace(R.id.frag_container, frag).commit()
     }
-
-    override fun moveToFragment(frag: Fragment,key : String?,data:String?) {
+    override fun moveToFragment(frag: Fragment,key : String?,data: SongInfo) {
         key?.let{
             val args = Bundle()
-            args.putString(it,data)
+            args.putSerializable(it,data)
             frag.arguments = args
         }
         supportFragmentManager.beginTransaction().replace(R.id.frag_container, frag).addToBackStack(null).commit()
@@ -367,19 +373,29 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         // Handle presses on the action bar menu items
         when (item.itemId) {
             R.id.menu_Music -> {
-                supportFragmentManager.beginTransaction().replace(R.id.frag_container,MusicFrag()).commit()
+                popAllBackStack()
+                connectFragment(MusicFrag())
                 return true
             }
             R.id.menu_Recommended -> {
-                supportFragmentManager.beginTransaction().replace(R.id.frag_container,RecommendFrag()).commit()
+                popAllBackStack()
+                connectFragment(RecommendFrag())
                 return true
             }
             R.id.menu_Search -> {
-                supportFragmentManager.beginTransaction().replace(R.id.frag_container,SearchFrag()).commit()
+                popAllBackStack()
+                connectFragment(SearchFrag())
                 return true
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+    private fun popAllBackStack(){
+        if(supportFragmentManager.backStackEntryCount>0){
+            do{
+                supportFragmentManager.popBackStackImmediate()
+            }while (supportFragmentManager.backStackEntryCount>0)
+        }
     }
 
     override fun setControllerAlpha(distance:Float){
