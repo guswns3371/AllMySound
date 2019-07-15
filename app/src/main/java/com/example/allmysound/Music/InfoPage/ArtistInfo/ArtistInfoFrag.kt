@@ -37,7 +37,8 @@ class ArtistInfoFrag: Fragment() , ArtistContract.View{
         presenter.setView(this)
 
         val songinfo = getFragArgs()
-        val query = MediaStore.Audio.Media.ARTIST +" == '${songinfo.artist.replace("'","''")}' "
+        val query = if(songinfo.albumArtist == "Unknown")  MediaStore.Audio.Media.ARTIST+"== '${songinfo.artist.replace("'","''")}'"
+        else " album_artist == '${songinfo.albumArtist.replace("'","''")}' "
         val orderBy =
                     MediaStore.Audio.AudioColumns.ALBUM + " ASC ,"+
                     MediaStore.Audio.AudioColumns.TRACK + " ASC"
@@ -48,10 +49,11 @@ class ArtistInfoFrag: Fragment() , ArtistContract.View{
     }
     private fun getAlbumList() : ArrayList<String>{
         val datalistTwo = ArrayList<String>()
-        datalist.forEach {
-            datalistTwo.add(it.album)
+        for(i in 0 until datalist.size){
+            if(!datalistTwo.contains(datalist[i].album))
+                datalistTwo.add(datalist[i].album)
         }
-        return ArrayList(HashSet(datalistTwo))
+        return datalistTwo
     }
     private fun  initRecyclerView(){
         val mAdapter = ArtistInfoAdapter(activity!!,datalist)

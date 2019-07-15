@@ -82,6 +82,7 @@ class SongListFrag: Fragment(),SongListContract.View {
         presenter.setView(this)
         val query = MediaStore.Audio.Media.IS_MUSIC +" != 0"
         val orderBy = "upper(${MediaStore.Audio.AudioColumns.TITLE})"
+//        val orderBy = "${MediaStore.MediaColumns.DATE_MODIFIED} DESC"
         songInfos = presenter.loadDataByQuery(activity!!,
             query,
             orderBy)

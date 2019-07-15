@@ -10,140 +10,75 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.net.toUri
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.Main.Model.SongInfo
+import com.example.allmysound.Music.InfoPage.AlbumInfo.Adapter.AlbumInfoAdapter
 import com.example.allmysound.Music.InfoPage.BaseViewHolder
 import com.example.allmysound.R
+import java.util.stream.Collectors
 
 class ArtistInfoAdapter(
     private val context: Context,
     private val datalist: ArrayList<SongInfo>
-): RecyclerView.Adapter<BaseViewHolder<*>>()   {
+): RecyclerView.Adapter<ArtistInfoAdapter.AlbumListHolder>()   {
 
     interface ArtistInfoClickListener{
         fun onClick(pos:Int)
     }
     var mClickListener: ArtistInfoClickListener? =null
     lateinit var albumlist : ArrayList<String>
-    var booleanlist : Array<Boolean> = emptyArray()
-    var diskZero = true
-    var diskOne = true
-    var diskTwo = true
-
     fun initAlbumlist(albumlist : ArrayList<String>){
         this.albumlist= albumlist
-        booleanlist =Array(albumlist.size) {true}
     }
 
-    inner class AlbumListHolder (itemView : View?) : BaseViewHolder<SongInfo>(itemView!!) {
-        private val artisinfoRV = itemView?.findViewById<RecyclerView>(R.id.artisinfo_RV)
-
-        private val albuminfoLO = itemView?.findViewById<LinearLayout>(R.id.albuminfo_LO)
-        private val songitemLO = itemView?.findViewById<LinearLayout>(R.id.songitem_LO)
-
-        private val image = itemView?.findViewById<ImageView>(R.id.ai_image)
-        private val album = itemView?.findViewById<TextView>(R.id.ai_album)
-        private val aritst = itemView?.findViewById<TextView>(R.id.ai_aritst)
-        private val genre = itemView?.findViewById<TextView>(R.id.ai_genre)
-        private val date = itemView?.findViewById<TextView>(R.id.ai_date)
-
-        private val infoDisk = itemView?.findViewById<TextView>(R.id.info_disk)
-        private val infoUnderline = itemView?.findViewById<LinearLayout>(R.id.info_underline)
-        private val infoNum = itemView?.findViewById<TextView>(R.id.info_num)
-        private val infoTitle = itemView?.findViewById<TextView>(R.id.info_title)
-        private val infoPlayingImg = itemView?.findViewById<ImageView>(R.id.info_isplaying_img)
-
-        override fun bind(item: SongInfo, pos: Int, context: Context) {
-
-            val albumName = item.album
-            val index = albumlist.indexOf(albumName)
-            if(booleanlist[index]){
-                albuminfoLO?.visibility = View.VISIBLE
-                booleanlist[index] = false
-            } else{
-                albuminfoLO?.visibility = View.GONE
-            }
-
-
-            /**albuminfoLO*/
-            this.image?.let {
-                Glide.with(context)
-                    .load(item.img.toUri())
-                    .apply(RequestOptions().error(R.drawable.song_500))
-                    .into(it)
-            }
-            album?.text = item.album
-            aritst?.text = item.title
-            genre?.text = item.genre
-            date?.text = item.date
-
-            /**songitemLO*/
-            when (val trackNum = item.album_track_num.toInt()) {
-                in 2000..2999 -> {
-                    infoNum?.text = "${trackNum %2000}"
-                    infoDisk?.text = "디스크 2"
-                    if(diskTwo)
-                        infoDisk?.visibility = View.VISIBLE
-                    else
-                        infoDisk?.visibility = View.GONE
-                    diskTwo = false
-                }
-                in 1000..1999 -> {
-                    infoNum?.text = "${trackNum %1000}"
-                    infoDisk?.text = "디스크 1"
-                    if(diskOne)
-                        infoDisk?.visibility = View.VISIBLE
-                    else
-                        infoDisk?.visibility = View.GONE
-                    diskOne = false
-                }
-                in 0..999 -> {
-                    infoNum?.text = "$trackNum"
+    inner class AlbumListHolder (itemView : View?) : RecyclerView.ViewHolder(itemView!!) {
+        private val mRecyclerView = itemView?.findViewById<RecyclerView>(R.id.artisinfo_RV)
+        fun bindRecyclerView(item : ArrayList<SongInfo>, pos: Int, context: Context){
+            val albumName = albumlist[pos] // 앨범 이름
+            var posIndatalist=0
+            for(i in 0 until datalist.size){
+                if(datalist[i].album==albumName){
+                    posIndatalist=i // datalist속 특정 앨범의 첫 번째 곡의 포지션값
+                    break
                 }
             }
-            infoTitle?.text = item.title
-
-            if (MainActivity.prefs.getIsPlayingInfo()?.idx == item.idx){
-                infoPlayingImg?.visibility = View.VISIBLE
-                infoUnderline?.visibility = View.VISIBLE
-                infoTitle?.typeface = Typeface.DEFAULT_BOLD
-            } else{
-                infoPlayingImg?.visibility = View.INVISIBLE
-                infoUnderline?.visibility = View.INVISIBLE
-                infoTitle?.typeface = Typeface.DEFAULT
-            }
-
-
-            if(mClickListener!=null){
-                songitemLO?.setOnClickListener{
-                    mClickListener?.onClick(pos)
+            val mAdapter = AlbumInfoAdapter(context,item)
+            mAdapter.mClickListener = object  : AlbumInfoAdapter.AlbumInfoClickListener{
+                override fun onClick(pos: Int) {
+                    MainActivity.createMainPresenter().LinkDataList(datalist)
+                    MainActivity.createMainPresenter().AlbumlinkDataIndex(pos+posIndatalist)
+                    MainActivity.createMainPresenter().checkIsPlaying()
+                    MainActivity.createMainPresenter().setRandomIdxNumList()
                     myNotifyDataSetChanged()
                 }
             }
+            MainActivity.createMainPresenter().LinkAdapter(mAdapter)
+
+            mRecyclerView?.adapter = mAdapter
+            mRecyclerView?.layoutManager= LinearLayoutManager(context)
+            mRecyclerView?.setHasFixedSize(true)
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<*> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumListHolder {
         val  view = LayoutInflater.from(context).inflate(R.layout.infolist_artistinfo_item,parent,false)
         return AlbumListHolder(view)
     }
 
     override fun getItemCount(): Int {
-        return datalist.size
+        return albumlist.size
     }
 
-    override fun onBindViewHolder(holder: BaseViewHolder<*>, position: Int) {
-        holder.bind(datalist[position],position,context)
+    override fun onBindViewHolder(holder:AlbumListHolder, position: Int) {
+        val list = datalist.stream().filter { it.album==albumlist[position] }.collect(Collectors.toList())
+        holder.bindRecyclerView(ArrayList(list),position,context)
     }
 
     fun myNotifyDataSetChanged(){
-        booleanlist =Array(albumlist.size) {true}
-        diskZero = true
-        diskOne = true
-        diskTwo = true
         notifyDataSetChanged()
     }
 }

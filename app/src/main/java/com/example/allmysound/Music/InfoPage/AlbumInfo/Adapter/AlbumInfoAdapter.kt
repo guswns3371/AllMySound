@@ -62,6 +62,7 @@ class AlbumInfoAdapter (
                     diskOne = false
                 }
                 in 0..999 -> {
+                    infoDisk?.visibility = View.GONE
                     infoNum?.text = "$trackNum"
                 }
             }
@@ -99,7 +100,7 @@ class AlbumInfoAdapter (
                     .into(it)
             }
             album?.text = item.album
-            aritst?.text = item.artist
+            aritst?.text = if( item.artist=="Unknown") item.albumArtist else item.artist
             genre?.text = item.genre
             date?.text = item.date
         }

@@ -24,6 +24,7 @@ interface BaseContract {
 
                 val columnIndexIdx : Int
                 val columnIndexData : Int
+                val columnIndexDataModified : Int
                 val columnIndexName: Int
                 var columnIndexGenre: Int
                 var columnIndexAlbumArtist: Int
@@ -40,6 +41,7 @@ interface BaseContract {
                 val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                 val mediaProjection  =arrayOf(
                     MediaStore.MediaColumns.DATA,
+                    MediaStore.MediaColumns.DATE_MODIFIED,
                     MediaStore.Audio.Media.DATA,
                     MediaStore.Audio.Media.ALBUM_ID,
                     MediaStore.Audio.Albums._ID,
@@ -64,6 +66,7 @@ interface BaseContract {
 
                 columnIndexName = mediaCursor!!.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.DISPLAY_NAME)
                 columnIndexData = mediaCursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA)
+                columnIndexDataModified = mediaCursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED)
                 columnIndexDataTime=   mediaCursor.getColumnIndexOrThrow( MediaStore.Audio.AudioColumns.DURATION)
                 columnIndexDataAlbum=   mediaCursor.getColumnIndexOrThrow( MediaStore.Audio.Media.ALBUM)
                 columnIndexDataAlbumTrackNum=   mediaCursor.getColumnIndexOrThrow( MediaStore.Audio.AudioColumns.TRACK)
@@ -82,6 +85,7 @@ interface BaseContract {
                     val title = mediaCursor.getString(columnIndexDataTitle)
                     val path = mediaCursor.getString(columnIndexData)
                     val filename = mediaCursor.getString(columnIndexName)
+                    var modifiedDate = mediaCursor.getString(columnIndexDataModified)
                     val album = mediaCursor.getString(columnIndexDataAlbum)
                     val albumTrackNum = mediaCursor.getString(columnIndexDataAlbumTrackNum)
                     val albumId = mediaCursor.getLong(columnIndexDataAlbumId)
@@ -116,6 +120,7 @@ interface BaseContract {
                     }
                     date = date ?: "Unknown"
                     albumArtist = albumArtist ?: "Unknown"
+                    modifiedDate = modifiedDate ?: "Unknown"
 
                     listOfAllSongs.add(
                         SongInfo(
@@ -131,7 +136,8 @@ interface BaseContract {
                             genre,
                             date,
                             path,
-                            filename
+                            filename,
+                            modifiedDate
                         )
                     )
                     num++
