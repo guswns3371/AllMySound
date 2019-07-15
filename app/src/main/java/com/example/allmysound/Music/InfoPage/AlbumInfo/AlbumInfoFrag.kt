@@ -51,8 +51,11 @@ class AlbumInfoFrag: Fragment() , AlbumContract.View {
         presenter.setView(this)
 
         val songinfo = getFragArgs()
+        val queryTwo = if(songinfo.albumArtist == "Unknown")  MediaStore.Audio.Media.ARTIST+"== '${songinfo.artist.replace("'","''")}'"
+        else " album_artist == '${songinfo.albumArtist.replace("'","''")}' "
+
         val query = MediaStore.Audio.Media.ALBUM +" == '${songinfo.album.replace("'","''")}' "+
-                " and "+ MediaStore.Audio.Media.ARTIST +" == '${songinfo.artist.replace("'","''")}' "
+                " and "+queryTwo
         val orderBy = MediaStore.Audio.AudioColumns.TRACK+" ASC"
 
         datalist=  presenter.loadDataByQuery(activity!!,

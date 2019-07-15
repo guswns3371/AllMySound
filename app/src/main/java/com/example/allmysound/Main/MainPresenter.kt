@@ -245,10 +245,12 @@ class MainPresenter: MainContract.Presenter {
     }
 
     override fun moreBtnClicked() {
+        if(MainActivity.prefs.getIsPlayingInfo() == null) return
         Log.e("moreBtnClicked ",MainActivity.prefs.getIsPlayingInfo().toString())
         view.showMoreBtn()
     }
     override fun playBtnClicked() {
+        if(MainActivity.prefs.getIsPlayingInfo() == null) return
         if(MainActivity.prefs.getPlayBoolean()){
             view.changePlayBtn(true)
             MainActivity.prefs.setPlayBoolean(false)
@@ -265,10 +267,12 @@ class MainPresenter: MainContract.Presenter {
         }
     }
     override fun nextBtnClicked() {
+        if(MainActivity.prefs.getIsPlayingInfo() == null) return
         nextMusic()
         notifyAdapters()
     }
     override fun prevBtnClicked() {
+        if(MainActivity.prefs.getIsPlayingInfo() == null) return
         prevMusic()
         notifyAdapters()
     }
@@ -337,7 +341,7 @@ class MainPresenter: MainContract.Presenter {
         if(albumInfoAdapter!=null)
             albumInfoAdapter!!.myNotifyDataSetChanged()
         if(artistInfoAdapter!=null)
-            artistInfoAdapter!!.notifyDataSetChanged()
+            artistInfoAdapter!!.myNotifyDataSetChanged()
     }
 
     fun setRandomIdxNumList(){

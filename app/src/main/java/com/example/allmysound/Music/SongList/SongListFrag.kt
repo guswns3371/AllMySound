@@ -80,9 +80,11 @@ class SongListFrag: Fragment(),SongListContract.View {
     fun initPresenter(){
         presenter = SongListPresenter(activity!!)
         presenter.setView(this)
+        val query = MediaStore.Audio.Media.IS_MUSIC +" != 0"
+        val orderBy = "upper(${MediaStore.Audio.AudioColumns.TITLE})"
         songInfos = presenter.loadDataByQuery(activity!!,
-            MediaStore.Audio.Media.IS_MUSIC +" != 0",
-            MediaStore.Audio.AudioColumns.TITLE)
+            query,
+            orderBy)
     }
     fun initRecyclerView(){
         val myAdapter = SongListAdapter(activity!!,songInfos)

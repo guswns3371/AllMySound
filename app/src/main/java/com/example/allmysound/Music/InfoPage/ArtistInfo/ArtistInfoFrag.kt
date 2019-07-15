@@ -46,8 +46,16 @@ class ArtistInfoFrag: Fragment() , ArtistContract.View{
             query,
             orderBy)
     }
+    private fun getAlbumList() : ArrayList<String>{
+        val datalistTwo = ArrayList<String>()
+        datalist.forEach {
+            datalistTwo.add(it.album)
+        }
+        return ArrayList(HashSet(datalistTwo))
+    }
     private fun  initRecyclerView(){
         val mAdapter = ArtistInfoAdapter(activity!!,datalist)
+        mAdapter.initAlbumlist(getAlbumList())
         mAdapter.mClickListener = object  : ArtistInfoAdapter.ArtistInfoClickListener {
             override fun onClick(pos: Int) {
                 MainActivity.createMainPresenter().LinkDataList(datalist)

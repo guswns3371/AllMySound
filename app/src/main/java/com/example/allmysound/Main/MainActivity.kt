@@ -300,6 +300,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         customDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
     private fun goToArtistInfo(){
+        if(MainActivity.prefs.getIsPlayingInfo() == null) return
         val songInfo = MainActivity.prefs.getIsPlayingInfo()!!
         moveToFragment(
             ArtistInfoFrag(),
@@ -307,6 +308,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         sliding_layout.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
     }
     private fun goToAlbumInfo(){
+        if(MainActivity.prefs.getIsPlayingInfo() == null) return
         val songInfo = MainActivity.prefs.getIsPlayingInfo()!!
         moveToFragment(
             AlbumInfoFrag(),

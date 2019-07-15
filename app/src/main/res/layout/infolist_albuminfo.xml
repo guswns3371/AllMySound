@@ -4,7 +4,7 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content" android:background="@color/white"
               android:paddingStart="20dp" android:paddingTop="15dp" android:paddingEnd="20dp"
-              android:paddingBottom="15dp">
+              android:paddingBottom="15dp" android:id="@+id/albuminfo_LO">
 
     <androidx.cardview.widget.CardView
             android:layout_width="120dp"

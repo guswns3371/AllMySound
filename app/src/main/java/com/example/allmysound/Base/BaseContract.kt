@@ -26,6 +26,7 @@ interface BaseContract {
                 val columnIndexData : Int
                 val columnIndexName: Int
                 var columnIndexGenre: Int
+                var columnIndexAlbumArtist: Int
                 val columnIndexDate: Int
                 val columnIndexDataAlbumId: Int
                 val columnIndexDataAlbum: Int
@@ -51,7 +52,8 @@ interface BaseContract {
                     MediaStore.Audio.AudioColumns.TITLE_KEY,
                     MediaStore.Audio.AudioColumns.DURATION,
                     MediaStore.Audio.AudioColumns.TRACK,
-                    MediaStore.Audio.AudioColumns.YEAR
+                    MediaStore.Audio.AudioColumns.YEAR,
+                    "album_artist"
                 )
             val genreProjection = arrayOf(
                 MediaStore.Audio.Genres.NAME,
@@ -70,6 +72,7 @@ interface BaseContract {
                 columnIndexDataTitle=   mediaCursor.getColumnIndexOrThrow( MediaStore.Audio.AudioColumns.TITLE)
                 columnIndexIdx=   mediaCursor.getColumnIndexOrThrow( MediaStore.Audio.AudioColumns._ID)
                 columnIndexDate=   mediaCursor.getColumnIndexOrThrow(  MediaStore.Audio.AudioColumns.YEAR)
+                columnIndexAlbumArtist=   mediaCursor.getColumnIndexOrThrow(  "album_artist")
 
                 var num = 0
             if (mediaCursor.moveToFirst()) {
@@ -84,6 +87,7 @@ interface BaseContract {
                     val albumId = mediaCursor.getLong(columnIndexDataAlbumId)
                     var time = mediaCursor.getString(columnIndexDataTime)
                     var date = mediaCursor.getString(columnIndexDate)
+                    var albumArtist = mediaCursor.getString(columnIndexAlbumArtist)
 
                     var genre  =""
 //                    val genUri = MediaStore.Audio.Genres.getContentUriForAudioId("external", idx.toInt())
@@ -110,7 +114,8 @@ interface BaseContract {
                         val secStr = if (sec<10)  "0$sec" else  "$sec"
                         "$min:$secStr"
                     }
-                    date = if(date==null) "" else date
+                    date = date ?: "Unknown"
+                    albumArtist = albumArtist ?: "Unknown"
 
                     listOfAllSongs.add(
                         SongInfo(
@@ -118,6 +123,7 @@ interface BaseContract {
                             idx,
                             imgUri.toString(),
                             artist,
+                            albumArtist,
                             title,
                             album,
                             albumTrackNum,

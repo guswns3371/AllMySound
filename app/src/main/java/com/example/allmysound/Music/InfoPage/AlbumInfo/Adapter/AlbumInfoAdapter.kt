@@ -65,9 +65,7 @@ class AlbumInfoAdapter (
                     infoNum?.text = "$trackNum"
                 }
             }
-
             infoTitle?.text = item.title
-
             if (MainActivity.prefs.getIsPlayingInfo()?.idx == item.idx){
                 infoPlayingImg?.visibility = View.VISIBLE
                 infoUnderline?.visibility = View.VISIBLE
@@ -77,6 +75,7 @@ class AlbumInfoAdapter (
                 infoUnderline?.visibility = View.INVISIBLE
                 infoTitle?.typeface = Typeface.DEFAULT
             }
+
             if(mClickListener!=null){
                 itemView.setOnClickListener{
                     mClickListener?.onClick(pos-1) // position =0 에 앨범정보가 들어가있기 때문에 pos-1 해준다
@@ -103,7 +102,6 @@ class AlbumInfoAdapter (
             aritst?.text = item.artist
             genre?.text = item.genre
             date?.text = item.date
-
         }
     }
 
