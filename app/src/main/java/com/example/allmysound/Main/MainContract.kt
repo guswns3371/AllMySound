@@ -2,6 +2,7 @@ package com.example.allmysound.Main
 
 import android.content.Context
 import android.os.Bundle
+import android.transition.Visibility
 import android.widget.SeekBar
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
@@ -24,6 +25,8 @@ interface MainContract {
         fun setImageSize(distance:Float)
 
         fun showMoreBtn()
+        fun visibilityLyrics(visibility: Int)
+        fun setLyrics(text: String)
         fun setSongTitle(text:String)
         fun setSongInnerTitle(text:String)
         fun setSongAlbum(text:String)
@@ -73,6 +76,7 @@ interface MainContract {
         fun onSlideListener(): SlidingUpPanelLayout.PanelSlideListener
         fun slidingPanelLayoutListener(slidingLayout:SlidingUpPanelLayout)
 
+        fun lyricTxtClicked()
         fun moreBtnClicked()
         fun checkIsPlaying()
         fun playBtnClicked()

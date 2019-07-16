@@ -5,8 +5,10 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.media.AudioManager
+import android.opengl.Visibility
 import android.os.Bundle
 import android.os.Handler
+import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.*
 import android.widget.Toast
@@ -32,6 +34,9 @@ import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.squareup.picasso.Picasso
+import org.jaudiotagger.audio.AudioFileIO
+import org.jaudiotagger.tag.FieldKey
+import java.io.File
 
 
 class MainActivity : AppCompatActivity(), MainContract.View {
@@ -97,8 +102,15 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             true }
         music_control.setOnClickListener { sliding_layout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED }
         ctr_cover_cv.setOnClickListener {
-            if (sliding_layout.panelState ==SlidingUpPanelLayout.PanelState.EXPANDED)
-            showToast("ctr_cover") }
+            if (sliding_layout.panelState ==SlidingUpPanelLayout.PanelState.EXPANDED){
+                presenter.lyricTxtClicked()
+                sliding_layout.isTouchEnabled = false
+            }
+            }
+        ctr_lyrics.setOnClickListener {
+            visibilityLyrics(View.GONE)
+            sliding_layout.isTouchEnabled = true
+        }
         song_album.setOnClickListener { }
         song_artist.setOnClickListener {goToArtistInfo()}
         more.setOnClickListener { presenter.moreBtnClicked() }
@@ -113,6 +125,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         ctr_name.isSelected =true
         song_title_.isSelected =true
         song_album.isSelected =true
+        ctr_lyrics.movementMethod = ScrollingMovementMethod()
+
+        if (sliding_layout.panelState ==SlidingUpPanelLayout.PanelState.EXPANDED)
+            ctr_lyrics.visibility = View.GONE
     }
     fun initPresenter(){
         presenter.setView(this)
@@ -244,6 +260,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun showMoreBtn(){
         initCustomDialog()
     }
+
     private fun initCustomDialog(){
         val customDialog= MoreCustomDialog(this)
         customDialog.setSongList(presenter.getSongList())
@@ -314,6 +331,14 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             AlbumInfoFrag(),
             AlbumInfoFrag().DATA_RECEIVE,songInfo)
         sliding_layout.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
+    }
+
+    override fun setLyrics(text: String) {
+        ctr_lyrics.text = text
+    }
+
+    override fun visibilityLyrics(visibility: Int){
+        ctr_lyrics.visibility = visibility
     }
     override fun changePlayBtn(isPlay:Boolean){
         if (isPlay){

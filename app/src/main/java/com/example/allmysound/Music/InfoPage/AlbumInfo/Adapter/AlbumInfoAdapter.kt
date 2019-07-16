@@ -16,6 +16,9 @@ import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.Music.InfoPage.BaseViewHolder
 import com.example.allmysound.R
+import org.jaudiotagger.audio.AudioFileIO
+import org.jaudiotagger.tag.FieldKey
+import java.io.File
 
 class AlbumInfoAdapter (
     private val context: Context,
@@ -101,7 +104,8 @@ class AlbumInfoAdapter (
             }
             album?.text = item.album
             aritst?.text = if( item.artist=="Unknown") item.albumArtist else item.artist
-            genre?.text = item.genre
+//            genre?.text =if(getGenre(item)=="") "Unknown" else getGenre(item)
+            genre?.text =item.genre
             date?.text = item.date
         }
     }
@@ -111,6 +115,10 @@ class AlbumInfoAdapter (
         diskOne = true
         diskTwo = true
         notifyDataSetChanged()
+    }
+    private fun getGenre(item: SongInfo): String{
+        val mp3 = AudioFileIO.read(File(item.file_path))
+        return mp3.tag.getFirst(FieldKey.GENRE)
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): BaseViewHolder<*>  {

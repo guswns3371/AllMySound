@@ -10,7 +10,11 @@ import com.example.allmysound.Music.InfoPage.AlbumInfo.Adapter.AlbumInfoAdapter
 import com.example.allmysound.Music.InfoPage.ArtistInfo.AritstInfo.ArtistInfoAdapter
 import com.example.allmysound.Music.SongList.SongListAdapter
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
+import org.jaudiotagger.audio.AudioFileIO
+import org.jaudiotagger.tag.FieldKey
+import java.io.File
 import java.lang.Exception
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
@@ -99,13 +103,16 @@ class MainPresenter: MainContract.Presenter {
     override fun getASongData() {
         val songInfo =  MainActivity.prefs.getIsPlayingInfo()
         if (songInfo != null) {
+            this.idx = songInfo.orderNum
             view.setSongAlbum(songInfo.album)
             view.setSongArtist(songInfo.artist)
             view.setSongInnerTitle(songInfo.title)
             view.setSongTitle(songInfo.title)
             view.setSongAlbumArt(songInfo.img)
             view.setSongTime(songInfo.time)
-            this.idx = songInfo.orderNum
+
+            view.setLyrics(getLyrics())
+            view.visibilityLyrics(View.GONE)
         }
     }
     private fun startMusic(){
@@ -244,6 +251,14 @@ class MainPresenter: MainContract.Presenter {
         }
     }
 
+    override fun lyricTxtClicked() {
+        if(MainActivity.prefs.getIsPlayingInfo() == null) return
+        if(getLyrics()=="")
+            view.visibilityLyrics(View.GONE)
+        else
+            view.visibilityLyrics(View.VISIBLE)
+        view.setLyrics(getLyrics())
+    }
     override fun moreBtnClicked() {
         if(MainActivity.prefs.getIsPlayingInfo() == null) return
         Log.e("moreBtnClicked ",MainActivity.prefs.getIsPlayingInfo().toString())
@@ -316,6 +331,8 @@ class MainPresenter: MainContract.Presenter {
             override fun onPanelSlide(panel: View?, slideOffset: Float) {
                 view.setImageSize(slideOffset)
                 view.setControllerAlpha(slideOffset)
+                if(slideOffset!=1.0f)
+                    view.visibilityLyrics(View.GONE)
             }
             override fun onPanelStateChanged(
                 panel: View?,
@@ -347,5 +364,11 @@ class MainPresenter: MainContract.Presenter {
     fun setRandomIdxNumList(){
             numList = getNumList()
             randomIdx = numList!!.indexOf(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)
+    }
+    private fun getLyrics(): String{
+        val songInfo =  MainActivity.prefs.getIsPlayingInfo()
+        val mp3 = AudioFileIO.read(File(songInfo!!.file_path))
+        val value = mp3.tag.getFirst(FieldKey.LYRICS)
+        return String(value.toByteArray(StandardCharsets.UTF_8),StandardCharsets.UTF_8)
     }
 }

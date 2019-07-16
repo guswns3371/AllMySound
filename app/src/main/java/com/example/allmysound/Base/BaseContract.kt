@@ -8,6 +8,9 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
 import com.example.allmysound.Main.Model.SongInfo
+import org.jaudiotagger.audio.AudioFileIO
+import org.jaudiotagger.tag.FieldKey
+import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -144,8 +147,6 @@ interface BaseContract {
                     //uri 를 저장해버리면 => json으로 변환시 uri 부분이 변환되지 않는다
                 }while (mediaCursor.moveToNext())
             }
-
-
                 return listOfAllSongs
         }
     }
