@@ -7,4 +7,6 @@
     <dimen name="sp_album">18sp</dimen>
     <dimen name="sp_song">16sp</dimen>
     <dimen name="underline_height">7dp</dimen>
+
+    <integer name="original_img_size">210</integer>
 </resources>

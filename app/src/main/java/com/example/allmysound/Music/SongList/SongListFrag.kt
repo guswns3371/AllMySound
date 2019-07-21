@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.R
 import com.example.allmysound.Main.Model.SongInfo
+import com.example.allmysound.Music.SongList.Adapter.SongListAdapter
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
 import com.reddit.indicatorfastscroll.FastScrollItemIndicator
@@ -20,6 +21,11 @@ import com.reddit.indicatorfastscroll.FastScrollerThumbView
 import com.reddit.indicatorfastscroll.FastScrollerView
 
 class SongListFrag: Fragment(),SongListContract.View {
+    override fun connectFragment(frag: Fragment) {
+    }
+
+    override fun moveToFragment(frag: Fragment, key: String?, data: Any) {
+    }
 
     private lateinit var mRecyclerView : androidx.recyclerview.widget.RecyclerView
     private lateinit var mFastScrollView : FastScrollerView
@@ -57,9 +63,6 @@ class SongListFrag: Fragment(),SongListContract.View {
         return view
     }
 
-    override fun showToast(message: String) {
-        Toast.makeText(activity!!,message,Toast.LENGTH_SHORT).show()
-    }
     fun Permission(){
         val permissionlistener = object : PermissionListener {
             override fun onPermissionGranted() {
@@ -88,7 +91,7 @@ class SongListFrag: Fragment(),SongListContract.View {
             orderBy)
     }
     fun initRecyclerView(){
-        val myAdapter = SongListAdapter(activity!!,songInfos)
+        val myAdapter = SongListAdapter(activity!!, songInfos)
         myAdapter.mClickListener = object : SongListAdapter.SongListClickListener{
             override fun onClick(pos: Int) {
                 MainActivity.createMainPresenter().LinkDataList(songInfos)

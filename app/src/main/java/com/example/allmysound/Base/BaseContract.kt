@@ -7,6 +7,7 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
+import androidx.fragment.app.Fragment
 import com.example.allmysound.Main.Model.SongInfo
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
@@ -17,7 +18,8 @@ import java.util.concurrent.TimeUnit
 
 interface BaseContract {
     interface View{
-        fun showToast(message:String)
+        fun connectFragment(frag: Fragment)
+        fun moveToFragment(frag: Fragment,key : String?,data: Any)
     }
     interface Presenter<T>{
         fun setView(view: T)
@@ -147,7 +149,8 @@ interface BaseContract {
                     //uri 를 저장해버리면 => json으로 변환시 uri 부분이 변환되지 않는다
                 }while (mediaCursor.moveToNext())
             }
-                return listOfAllSongs
+            mediaCursor.close()
+            return listOfAllSongs
         }
     }
 }

@@ -13,6 +13,7 @@ import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.example.allmysound.Extensions.getPreference
 import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.R
@@ -28,7 +29,7 @@ class CPlayListAdapter (
         fun onItemClick(pos:Int)
     }
     var mClickListener: CustomPlayListClickListener? =null
-    private val numlist: ArrayList<Int> = MainActivity.prefs.getPlayListInt()
+    private val numlist: ArrayList<Int> = context.getPreference().getPlayListInt()!!
 
     inner class MyViewHolder (itemView : View?) : RecyclerView.ViewHolder(itemView!!) {
         val csongunderline = itemView?.findViewById<LinearLayout>(R.id.csong_underline)
@@ -55,7 +56,7 @@ class CPlayListAdapter (
             cartistname?.text = song.artist
             csongname?.text = song.title
 
-            val orderNum= MainActivity.prefs.getIsPlayingInfo()!!.orderNum
+            val orderNum= context.getPreference().getIsPlayingInfo()!!.orderNum
             if(numlist.indexOf(orderNum) == pos){
                 csongname?.typeface = Typeface.DEFAULT_BOLD
                 cplaying_img?.visibility = View.VISIBLE
@@ -71,7 +72,7 @@ class CPlayListAdapter (
             if(mClickListener!=null){
                 itemView.setOnClickListener{
                     mClickListener?.onItemClick(pos)
-                    MainActivity.prefs.setIsPlayingInfo(song)
+                    context.getPreference().setIsPlayingInfo(song)
                     notifyDataSetChanged()
                 }
             }
@@ -101,14 +102,14 @@ class CPlayListAdapter (
         val oldNum = numlist[oldPos]
         numlist.remove(oldNum)
         numlist.add(newPos,oldNum)
-        MainActivity.prefs.setPlayListInt(numlist)
+        context.getPreference().setPlayListInt(numlist)
 
-        if(MainActivity.prefs.getShuffleBoolean())
-            MainActivity.presenter.PlaylistllinkDataUpdateIndex(
-            numlist.indexOf(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)) // randomIdx를 업데이트 한다
+        if(context.getPreference().getShuffleBoolean())
+            MainActivity.createMainPresenter().PlaylistllinkDataUpdateIndex(
+            numlist.indexOf(context.getPreference().getIsPlayingInfo()!!.orderNum)) // randomIdx를 업데이트 한다
         else
-            MainActivity.presenter.SonglinkDataUpdateIndex(
-                numlist.indexOf(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)) // Idx를 업데이트 한다
+            MainActivity.createMainPresenter().SonglinkDataUpdateIndex(
+                numlist.indexOf(context.getPreference().getIsPlayingInfo()!!.orderNum)) // Idx를 업데이트 한다
 
         notifyItemMoved(oldPos,newPos)
     }

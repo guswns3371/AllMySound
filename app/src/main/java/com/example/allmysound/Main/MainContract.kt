@@ -1,26 +1,18 @@
 package com.example.allmysound.Main
 
-import android.content.Context
-import android.os.Bundle
-import android.transition.Visibility
 import android.widget.SeekBar
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.example.allmysound.Base.BaseContract
-import com.example.allmysound.Main.Dialog.Adapter.CPlayListAdapter
 import com.example.allmysound.Main.Model.SongInfo
-import com.example.allmysound.Music.InfoPage.AlbumInfo.Adapter.AlbumInfoAdapter
-import com.example.allmysound.Music.SongList.SongListAdapter
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 
 interface MainContract {
     interface View:BaseContract.View{
-        override fun showToast(message: String)
+        override fun connectFragment(frag: Fragment)
+        override fun moveToFragment(frag: Fragment,key : String?,data: Any)
 
         fun setToolbar(toolbar: Toolbar)
-        fun moveToFragment(frag: Fragment,key : String?,data:SongInfo)
-        fun connectFragment(frag: Fragment)
         fun setControllerAlpha(distance:Float)
         fun setImageSize(distance:Float)
 
@@ -85,6 +77,10 @@ interface MainContract {
         fun rotateBtnClicked()
         fun shuffleBtnClicked()
         fun likeBtnClicked()
+
+        fun prepareMusic()
+        fun startMusic()
+        fun pauseMusic()
 
     }
 }

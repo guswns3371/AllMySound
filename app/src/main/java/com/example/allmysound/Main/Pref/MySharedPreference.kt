@@ -57,10 +57,10 @@ class MySharedPreference(private var context: Context) {
         return if (str == null) null else Gson().fromJson(str)
     }
     fun setPlayListInt(playlist: ArrayList<Int>){
-        val mIntList   = playlist.toArray()
+        val mIntList   = playlist.toArray()!!
         editor.putString(PLAYLIST,TextUtils.join(",=,",mIntList)).apply()
     }
-    fun getPlayListInt():ArrayList<Int>{
+    fun getPlayListInt():ArrayList<Int>?{
         val mList = TextUtils.split(prefs.getString(PLAYLIST,""),",=,")
         val arrayToList = ArrayList<String>(mList.toList())
         val newList = ArrayList<Int>()

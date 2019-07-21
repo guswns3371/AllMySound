@@ -2,10 +2,10 @@ package com.example.allmysound.Main
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.media.AudioManager
-import android.opengl.Visibility
 import android.os.Bundle
 import android.os.Handler
 import android.text.method.ScrollingMovementMethod
@@ -24,6 +24,8 @@ import android.widget.SeekBar
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.eightbitlab.supportrenderscriptblur.SupportRenderScriptBlur
+import com.example.allmysound.Extensions.getPreference
+import com.example.allmysound.Extensions.showToast
 import com.example.allmysound.Main.Dialog.MoreCustomDialog
 import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.Main.Pref.MySharedPreference
@@ -34,16 +36,12 @@ import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.squareup.picasso.Picasso
-import org.jaudiotagger.audio.AudioFileIO
-import org.jaudiotagger.tag.FieldKey
-import java.io.File
 
 
 class MainActivity : AppCompatActivity(), MainContract.View {
     companion object {
         @SuppressLint("StaticFieldLeak")
-        lateinit var prefs: MySharedPreference
-        var presenter: MainPresenter = MainPresenter()
+        private lateinit var presenter: MainPresenter
         fun createMainPresenter() : MainPresenter = presenter
     }
 
@@ -52,7 +50,6 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         setContentView(R.layout.activity_main)
 
         blurry()
-        prefs = MySharedPreference(this)
         Permission()
         initPresenter()
         setToolbar(main_toolbar)
@@ -102,10 +99,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             true }
         music_control.setOnClickListener { sliding_layout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED }
         ctr_cover_cv.setOnClickListener {
-            if (sliding_layout.panelState ==SlidingUpPanelLayout.PanelState.EXPANDED){
-                presenter.lyricTxtClicked()
-                sliding_layout.isTouchEnabled = false
-            }
+                if (sliding_layout.panelState ==SlidingUpPanelLayout.PanelState.EXPANDED){
+                    presenter.lyricTxtClicked()
+                    if(ctr_lyrics.visibility == View.VISIBLE)
+                        sliding_layout.isTouchEnabled = false
+                }
             }
         ctr_lyrics.setOnClickListener {
             visibilityLyrics(View.GONE)
@@ -114,9 +112,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         song_album.setOnClickListener { }
         song_artist.setOnClickListener {goToArtistInfo()}
         more.setOnClickListener { presenter.moreBtnClicked() }
-        play_pre.setOnClickListener { presenter.prevBtnClicked() }
+        play_pre.setOnClickListener { presenter.prevBtnClicked() ; sliding_layout.isTouchEnabled = true}
         play.setOnClickListener { presenter.playBtnClicked()}
-        play_next.setOnClickListener { presenter.nextBtnClicked()}
+        play_next.setOnClickListener { presenter.nextBtnClicked() ; sliding_layout.isTouchEnabled = true}
         shuffle.setOnClickListener { presenter.shuffleBtnClicked()}
         like.setOnClickListener { presenter.likeBtnClicked() }
         rotate.setOnClickListener { presenter.rotateBtnClicked() }
@@ -131,6 +129,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             ctr_lyrics.visibility = View.GONE
     }
     fun initPresenter(){
+        presenter = MainPresenter(this)
         presenter.setView(this)
         presenter.slidingPanelLayoutListener(sliding_layout)
         presenter.getASongData()
@@ -264,7 +263,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     private fun initCustomDialog(){
         val customDialog= MoreCustomDialog(this)
         customDialog.setSongList(presenter.getSongList())
-        val songInfo = MainActivity.prefs.getIsPlayingInfo()!!
+        val songInfo = getPreference().getIsPlayingInfo()!!
         customDialog.mSetData = object : MoreCustomDialog.SetData {
             override fun setImage(): String = songInfo.img
             override fun setTitle(): String  =  songInfo.title
@@ -299,12 +298,12 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             }
 
             override fun clickShuffle() {
-                MainActivity.prefs.setShuffleBoolean(false)
+                getPreference().setShuffleBoolean(false)
                 presenter.shuffleBtnClicked()
             }
 
             override fun clickUnshuffle() {
-                MainActivity.prefs.setShuffleBoolean(true)
+                getPreference().setShuffleBoolean(true)
                 presenter.shuffleBtnClicked()
             }
         }
@@ -317,16 +316,16 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         customDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
     private fun goToArtistInfo(){
-        if(MainActivity.prefs.getIsPlayingInfo() == null) return
-        val songInfo = MainActivity.prefs.getIsPlayingInfo()!!
+        if(getPreference().getIsPlayingInfo() == null) return
+        val songInfo = getPreference().getIsPlayingInfo()!!
         moveToFragment(
             ArtistInfoFrag(),
             ArtistInfoFrag().DATA_RECEIVE,songInfo)
         sliding_layout.panelState = SlidingUpPanelLayout.PanelState.COLLAPSED
     }
     private fun goToAlbumInfo(){
-        if(MainActivity.prefs.getIsPlayingInfo() == null) return
-        val songInfo = MainActivity.prefs.getIsPlayingInfo()!!
+        if(getPreference().getIsPlayingInfo() == null) return
+        val songInfo = getPreference().getIsPlayingInfo()!!
         moveToFragment(
             AlbumInfoFrag(),
             AlbumInfoFrag().DATA_RECEIVE,songInfo)
@@ -369,16 +368,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             like.setImageResource(R.drawable.unlike)
     }
 
-    override fun showToast(message: String) {
-        Toast.makeText(this,message,Toast.LENGTH_SHORT).show()
-    }
     override fun connectFragment(frag: Fragment){
         supportFragmentManager.beginTransaction().replace(R.id.frag_container, frag).commit()
     }
-    override fun moveToFragment(frag: Fragment,key : String?,data: SongInfo) {
+    override fun moveToFragment(frag: Fragment,key : String?,data: Any) {
         key?.let{
             val args = Bundle()
-            args.putSerializable(it,data)
+            args.putSerializable(it,data as SongInfo)
             frag.arguments = args
         }
         supportFragmentManager.beginTransaction().replace(R.id.frag_container, frag).addToBackStack(null).commit()
@@ -433,7 +429,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
     override fun setImageSize(distance:Float){
 //        Log.e("ctr_cover_cv.layoutParams.height ","${ctr_cover_cv.layoutParams.height}")
-        val originalHeight = 210
+        val originalHeight =210
         val marginParams = ctr_cover_cv.layoutParams as MarginLayoutParams
         ctr_cover_cv.requestLayout()
         ctr_cover_cv.layoutParams.height = ((distance*820.0f).toInt()+originalHeight)

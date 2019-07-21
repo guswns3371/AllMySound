@@ -1,14 +1,17 @@
 package com.example.allmysound.Main
 
+import android.content.Context
 import android.media.MediaPlayer
 import android.util.Log
 import android.view.View
 import android.widget.SeekBar
+import com.example.allmysound.Base.BasicListFrag.BasicListAdapter
+import com.example.allmysound.Extensions.getPreference
 import com.example.allmysound.Main.Dialog.Adapter.CPlayListAdapter
 import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.Music.InfoPage.AlbumInfo.Adapter.AlbumInfoAdapter
 import com.example.allmysound.Music.InfoPage.ArtistInfo.AritstInfo.ArtistInfoAdapter
-import com.example.allmysound.Music.SongList.SongListAdapter
+import com.example.allmysound.Music.SongList.Adapter.SongListAdapter
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
@@ -18,11 +21,12 @@ import java.nio.charset.StandardCharsets
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
-class MainPresenter: MainContract.Presenter {
+class MainPresenter(private val context: Context): MainContract.Presenter {
 
     private lateinit var view : MainContract.View
 
-    private var songListAdapter :SongListAdapter? = null
+    private var basicListAdapter : BasicListAdapter? = null
+    private var songListAdapter : SongListAdapter? = null
     private var cplayListAdapter :CPlayListAdapter? = null
     private var albumInfoAdapter :AlbumInfoAdapter? = null
     private var artistInfoAdapter :ArtistInfoAdapter? = null
@@ -30,7 +34,7 @@ class MainPresenter: MainContract.Presenter {
     private var songInfolist: ArrayList<SongInfo>? =null
     private var numList: ArrayList<Int>? =  null
     var isNewState : Boolean = true
-    private var idx: Int =0
+    private var songlistIdx: Int =0
     private var randomIdx: Int =-1
     private var mp :  MediaPlayer = MediaPlayer()
 
@@ -48,24 +52,25 @@ class MainPresenter: MainContract.Presenter {
             is CPlayListAdapter ->{this.cplayListAdapter = Adapter}
             is AlbumInfoAdapter -> {this.albumInfoAdapter = Adapter}
             is ArtistInfoAdapter ->{this.artistInfoAdapter = Adapter}
+            is BasicListAdapter ->{this.basicListAdapter = Adapter}
             else -> throw IllegalArgumentException()
         }
     }
     /**SongListAdapter*/
     override fun SonglinkDataIndex(idx: Int) {
-        this.idx = idx
+        this.songlistIdx = idx
         SaveLoadPrepareStart()
         isNewState= false
     }
     override fun SonglinkDataUpdateIndex(idx: Int) {
-        this.idx = idx
+        this.songlistIdx = idx
     }
 
     /**CPlayListAdapter*/
     override fun PlaylistllinkDataIndex(randomIdx: Int) {
         this.randomIdx = randomIdx
-        val numList = MainActivity.prefs.getPlayListInt()
-        idx = numList[randomIdx]
+        val numList = context.getPreference().getPlayListInt()!!
+        songlistIdx = numList[randomIdx]
         SaveLoadPrepareStart()
         songListAdapter!!.notifyDataSetChanged()
     }
@@ -75,13 +80,13 @@ class MainPresenter: MainContract.Presenter {
 
     /**AlbumInfoAdapter*/
     override fun AlbumlinkDataIndex(idx: Int) {
-        this.idx = idx
+        this.songlistIdx = idx
         SaveLoadPrepareStart()
     }
 
     /**ArtistInfoAdapter*/
     override fun ArtistIlinkDataIndex(idx: Int) {
-        this.idx = idx
+        this.songlistIdx = idx
         SaveLoadPrepareStart()
     }
 
@@ -98,12 +103,12 @@ class MainPresenter: MainContract.Presenter {
         prepareMusic()
     }
     override fun saveData() {
-        MainActivity.prefs.setIsPlayingInfo(songInfolist!![idx])
+        context.getPreference().setIsPlayingInfo(songInfolist!![songlistIdx])
     }
     override fun getASongData() {
-        val songInfo =  MainActivity.prefs.getIsPlayingInfo()
+        val songInfo =  context.getPreference().getIsPlayingInfo()
         if (songInfo != null) {
-            this.idx = songInfo.orderNum
+            this.songlistIdx = songInfo.orderNum
             view.setSongAlbum(songInfo.album)
             view.setSongArtist(songInfo.artist)
             view.setSongInnerTitle(songInfo.title)
@@ -115,13 +120,13 @@ class MainPresenter: MainContract.Presenter {
             view.visibilityLyrics(View.GONE)
         }
     }
-    private fun startMusic(){
+    override fun startMusic(){
         try {
             mp.start()
             mp.setOnCompletionListener {
                 nextBtnClicked()
                 mp.reset()
-                mp.setDataSource(songInfolist!![idx++].file_path)
+                mp.setDataSource(songInfolist!![songlistIdx++].file_path)
                 mp.prepare()
                 connMusicSeekbar()
                 mp.start()
@@ -133,36 +138,36 @@ class MainPresenter: MainContract.Presenter {
             e.printStackTrace()
         }
     }
-    private fun prepareMusic(){
+    override fun prepareMusic(){
         try {
             mp.reset()
-            mp.setDataSource(songInfolist!![idx].file_path)
+            mp.setDataSource(songInfolist!![songlistIdx].file_path)
             mp.prepare()
             connMusicSeekbar() // mp.prepare() 이전에 위치하면 클남
             view.setMusicSeekBarListener(MusicSeekBarListener())
-            mp.isLooping = MainActivity.prefs.getRotateBoolean()
+            mp.isLooping = context.getPreference().getRotateBoolean()
         }catch (e : Exception){
             Log.e("MediaPlayer Exception","$e")
             e.printStackTrace()
         }
     }
-    private fun pauseMusic(){
+    override fun pauseMusic(){
         mp.pause()
     }
 
     private fun nextMusic(){
         view.setMusicSeekBarProgress(0)
-        val numList = MainActivity.prefs.getPlayListInt()
-        if(MainActivity.prefs.getShuffleBoolean()){
+        val numList = context.getPreference().getPlayListInt()!!
+        if(context.getPreference().getShuffleBoolean()){
             randomIdx++
             if(randomIdx == numList.size)
                 randomIdx =0
-            idx = numList[randomIdx]
+            songlistIdx = numList[randomIdx]
         }else{
             randomIdx =-1
-            idx++
-            if(idx == songInfolist!!.size)
-                idx =0
+            songlistIdx++
+            if(songlistIdx == songInfolist!!.size)
+                songlistIdx =0
         }
         if(mp.isPlaying)
             SaveLoadPrepareStart()
@@ -171,17 +176,17 @@ class MainPresenter: MainContract.Presenter {
         }
     }
     private fun prevMusic(){
-        val numList = MainActivity.prefs.getPlayListInt()
-        if(MainActivity.prefs.getShuffleBoolean()){
+        val numList = context.getPreference().getPlayListInt()!!
+        if(context.getPreference().getShuffleBoolean()){
             randomIdx--
             if(randomIdx<=-1)
                 randomIdx = numList.size-1
-            idx = numList[randomIdx]
+            songlistIdx = numList[randomIdx]
         }else{
             randomIdx = -1
-            idx--
-            if(idx <0)
-                idx =songInfolist!!.size-1
+            songlistIdx--
+            if(songlistIdx <0)
+                songlistIdx =songInfolist!!.size-1
         }
         if(mp.isPlaying)
             SaveLoadPrepareStart()
@@ -195,10 +200,10 @@ class MainPresenter: MainContract.Presenter {
         val max = songInfolist!!.size-1
         for(i in min..max) numbers.add(i)
 
-        if(MainActivity.prefs.getShuffleBoolean())
+        if(context.getPreference().getShuffleBoolean())
             numbers.shuffle()
 
-        MainActivity.prefs.setPlayListInt(numbers)
+        context.getPreference().setPlayListInt(numbers)
         return numbers
     }
 
@@ -232,9 +237,9 @@ class MainPresenter: MainContract.Presenter {
     }
 
     override fun loadSetting() {
-        view.changeRotateBtn(MainActivity.prefs.getRotateBoolean())
-        view.changeShuffleBtn(MainActivity.prefs.getShuffleBoolean())
-        view.changeLikeBtn(MainActivity.prefs.getLikeBoolean())
+        view.changeRotateBtn(context.getPreference().getRotateBoolean())
+        view.changeShuffleBtn(context.getPreference().getShuffleBoolean())
+        view.changeLikeBtn(context.getPreference().getLikeBoolean())
     }
     override fun setView(view: MainContract.View) {
         this.view = view
@@ -244,15 +249,15 @@ class MainPresenter: MainContract.Presenter {
     override fun checkIsPlaying() {
         if(mp.isPlaying){
             view.changePlayBtn(true)
-            MainActivity.prefs.setPlayBoolean(false)
+            context.getPreference().setPlayBoolean(false)
         }else{
             view.changePlayBtn(false)
-            MainActivity.prefs.setPlayBoolean(true)
+            context.getPreference().setPlayBoolean(true)
         }
     }
 
     override fun lyricTxtClicked() {
-        if(MainActivity.prefs.getIsPlayingInfo() == null) return
+        if(context.getPreference().getIsPlayingInfo() == null) return
         if(getLyrics()=="")
             view.visibilityLyrics(View.GONE)
         else
@@ -260,15 +265,15 @@ class MainPresenter: MainContract.Presenter {
         view.setLyrics(getLyrics())
     }
     override fun moreBtnClicked() {
-        if(MainActivity.prefs.getIsPlayingInfo() == null) return
-        Log.e("moreBtnClicked ",MainActivity.prefs.getIsPlayingInfo().toString())
+        if(context.getPreference().getIsPlayingInfo() == null) return
+        Log.e("moreBtnClicked ",context.getPreference().getIsPlayingInfo().toString())
         view.showMoreBtn()
     }
     override fun playBtnClicked() {
-        if(MainActivity.prefs.getIsPlayingInfo() == null) return
-        if(MainActivity.prefs.getPlayBoolean()){
+        if(context.getPreference().getIsPlayingInfo() == null) return
+        if(context.getPreference().getPlayBoolean()){
             view.changePlayBtn(true)
-            MainActivity.prefs.setPlayBoolean(false)
+            context.getPreference().setPlayBoolean(false)
             if(isNewState){
                 prepareMusic()
                 startMusic()
@@ -277,49 +282,49 @@ class MainPresenter: MainContract.Presenter {
             }
         }else{
             view.changePlayBtn(false)
-            MainActivity.prefs.setPlayBoolean(true)
+            context.getPreference().setPlayBoolean(true)
             pauseMusic()
         }
     }
     override fun nextBtnClicked() {
-        if(MainActivity.prefs.getIsPlayingInfo() == null) return
+        if(context.getPreference().getIsPlayingInfo() == null) return
         nextMusic()
         notifyAdapters()
     }
     override fun prevBtnClicked() {
-        if(MainActivity.prefs.getIsPlayingInfo() == null) return
+        if(context.getPreference().getIsPlayingInfo() == null) return
         prevMusic()
         notifyAdapters()
     }
     override fun rotateBtnClicked() {
-        if(MainActivity.prefs.getRotateBoolean()){
+        if(context.getPreference().getRotateBoolean()){
             view.changeRotateBtn(false)
-            MainActivity.prefs.setRotateBoolean(false)
+            context.getPreference().setRotateBoolean(false)
             mp.isLooping = false
         }else{
             view.changeRotateBtn(true)
-            MainActivity.prefs.setRotateBoolean(true)
+            context.getPreference().setRotateBoolean(true)
             mp.isLooping = true
         }
     }
     override fun shuffleBtnClicked() {
-        if(MainActivity.prefs.getShuffleBoolean()){
+        if(context.getPreference().getShuffleBoolean()){
             view.changeShuffleBtn(false)
-            MainActivity.prefs.setShuffleBoolean(false)
+            context.getPreference().setShuffleBoolean(false)
         }else{
             view.changeShuffleBtn(true)
-            MainActivity.prefs.setShuffleBoolean(true)
+            context.getPreference().setShuffleBoolean(true)
         }
 
         setRandomIdxNumList()
     }
     override fun likeBtnClicked(){
-        if(MainActivity.prefs.getLikeBoolean()){
+        if(context.getPreference().getLikeBoolean()){
             view.changeLikeBtn(false)
-            MainActivity.prefs.setLikeBoolean(false)
+            context.getPreference().setLikeBoolean(false)
         }else{
             view.changeLikeBtn(true)
-            MainActivity.prefs.setLikeBoolean(true)
+            context.getPreference().setLikeBoolean(true)
         }
     }
 
@@ -359,14 +364,16 @@ class MainPresenter: MainContract.Presenter {
             albumInfoAdapter!!.myNotifyDataSetChanged()
         if(artistInfoAdapter!=null)
             artistInfoAdapter!!.myNotifyDataSetChanged()
+        if(basicListAdapter!=null)
+            basicListAdapter!!.notifyDataSetChanged()
     }
 
     fun setRandomIdxNumList(){
             numList = getNumList()
-            randomIdx = numList!!.indexOf(MainActivity.prefs.getIsPlayingInfo()!!.orderNum)
+            randomIdx = numList!!.indexOf(context.getPreference().getIsPlayingInfo()!!.orderNum)
     }
     private fun getLyrics(): String{
-        val songInfo =  MainActivity.prefs.getIsPlayingInfo()
+        val songInfo =  context.getPreference().getIsPlayingInfo()
         val mp3 = AudioFileIO.read(File(songInfo!!.file_path))
         val value = mp3.tag.getFirst(FieldKey.LYRICS)
         return String(value.toByteArray(StandardCharsets.UTF_8),StandardCharsets.UTF_8)

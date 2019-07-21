@@ -12,6 +12,7 @@ import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.example.allmysound.Extensions.getPreference
 import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.Music.InfoPage.BaseViewHolder
@@ -70,7 +71,7 @@ class AlbumInfoAdapter (
                 }
             }
             infoTitle?.text = item.title
-            if (MainActivity.prefs.getIsPlayingInfo()?.idx == item.idx){
+            if (context.getPreference().getIsPlayingInfo()?.idx == item.idx){
                 infoPlayingImg?.visibility = View.VISIBLE
                 infoUnderline?.visibility = View.VISIBLE
                 infoTitle?.typeface = Typeface.DEFAULT_BOLD
@@ -103,7 +104,7 @@ class AlbumInfoAdapter (
                     .into(it)
             }
             album?.text = item.album
-            aritst?.text = if( item.artist=="Unknown") item.albumArtist else item.artist
+            aritst?.text = if( item.albumArtist=="Unknown") item.artist else item.albumArtist
 //            genre?.text =if(getGenre(item)=="") "Unknown" else getGenre(item)
             genre?.text =item.genre
             date?.text = item.date

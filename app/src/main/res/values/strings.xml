@@ -1,6 +1,19 @@
 <resources>
     <string name="app_name">AllMy    Sound</string>
-
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string-array name="viewpager_items">
+        <item>Musics</item>
+        <item>Playlist</item>
+        <item>Liked</item>
+    </string-array>
+
+    <string name="recently_added">최근에 추가한 곡</string>
+    <string name="recently_played">최근에 재생한 곡</string>
+    <string name="mostly_played">많이 재생한 곡</string>
+    <string name="liked_musics">좋아요 한 곡</string>
+    <string name="add_new_playlist">새 플레이리스트 추가</string>
+
+    <string name="default_musicplaying_txt">재생중인 음악이 없습니다</string>
+
 </resources>

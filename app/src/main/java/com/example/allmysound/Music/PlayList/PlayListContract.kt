@@ -1,12 +1,14 @@
-package com.example.allmysound.Music.InfoPage.AlbumInfo
+package com.example.allmysound.Music.PlayList
 
 import android.content.Context
+import androidx.fragment.app.Fragment
 import com.example.allmysound.Base.BaseContract
 import com.example.allmysound.Main.Model.SongInfo
 
-interface AlbumContract {
+interface PlayListContract {
     interface View:BaseContract.View{
-        fun getFragArgs(): SongInfo
+        override fun connectFragment(frag: Fragment)
+        override fun moveToFragment(frag: Fragment, key: String?, data: Any)
     }
     interface Presenter:BaseContract.Presenter<View>{
         override fun setView(view: View)

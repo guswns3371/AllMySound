@@ -11,6 +11,7 @@ import androidx.core.net.toUri
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.allmysound.Extensions.getPreference
 import com.example.allmysound.Main.Dialog.Adapter.CPlayListAdapter
 import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.Main.Model.SongInfo
@@ -109,8 +110,8 @@ class MoreCustomDialog(context: Context) : Dialog(context) {
         playlist_RV.setHasFixedSize(true)
 //     https://www.youtube.com/watch?v=dldrLPNoFnk
 
-        val orderNum = MainActivity.prefs.getIsPlayingInfo()!!.orderNum
-        val numlist = MainActivity.prefs.getPlayListInt()
+        val orderNum = context.getPreference().getIsPlayingInfo()!!.orderNum
+        val numlist = context.getPreference().getPlayListInt()!!
         Log.e("setPlayList ", "${numlist.indexOf(orderNum)}")
         playlist_RV.scrollToPosition(numlist.indexOf(orderNum))
     }

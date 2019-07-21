@@ -36,12 +36,13 @@
                                                 android:background="@drawable/round_img"
                                                 app:srcCompat="@drawable/song_500"
                                                 android:id="@+id/ctr_cover"/>
-                                    <TextView
-                                            android:layout_width="match_parent"
-                                            android:layout_height="match_parent" android:id="@+id/ctr_lyrics"
-                                            android:visibility="gone" android:textAlignment="center"
-                                            android:scrollbars="vertical"
-                                            android:background="@color/white" android:textColor="@color/black"/>
+                                        <TextView
+                                                android:layout_width="match_parent"
+                                                android:layout_height="match_parent" android:id="@+id/ctr_lyrics"
+                                                android:visibility="gone" android:textAlignment="center"
+                                                android:scrollbars="vertical"
+                                                android:background="@color/white" android:textColor="@color/black"
+                                                android:padding="10dp"/>
                                 </androidx.cardview.widget.CardView>
                                 <LinearLayout
                                         android:background="@color/transparent"
@@ -60,7 +61,7 @@
                                                 android:ellipsize="marquee"
                                                 android:marqueeRepeatLimit="marquee_forever"
 
-                                                android:text="재생중인 음악이 없습니다"
+                                                android:text="@string/default_musicplaying_txt"
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content" android:id="@+id/ctr_name"
                                                 android:layout_weight="1"
@@ -156,7 +157,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent">
                                 <TextView
-                                        android:text="재생중인 음악이 없습니다"
+                                        android:text="@string/default_musicplaying_txt"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content" android:id="@+id/song_title_"
                                         android:textSize="@dimen/sp_title"

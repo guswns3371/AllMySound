@@ -15,6 +15,11 @@ import com.example.allmysound.R
 
 
 class ArtistInfoFrag: Fragment() , ArtistContract.View{
+    override fun connectFragment(frag: Fragment) {
+    }
+
+    override fun moveToFragment(frag: Fragment, key: String?, data: Any) {
+    }
 
     val DATA_RECEIVE = "ArtistInfo"
     private lateinit var presenter : ArtistPresenter
@@ -73,7 +78,4 @@ class ArtistInfoFrag: Fragment() , ArtistContract.View{
         mRecyclerView.setHasFixedSize(true)
     }
     override fun getFragArgs(): SongInfo = arguments!!.getSerializable(DATA_RECEIVE) as SongInfo
-    override fun showToast(message: String) {
-        Toast.makeText(activity!!, message,Toast.LENGTH_SHORT).show()
-    }
 }
