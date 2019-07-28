@@ -12,8 +12,7 @@ import android.widget.TextView
 import androidx.core.net.toUri
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.example.allmysound.Extensions.getPreference
-import com.example.allmysound.Main.MainActivity
+import com.example.allmysound.Base.Extensions.getPreference
 import com.example.allmysound.R
 import com.example.allmysound.Main.Model.SongInfo
 

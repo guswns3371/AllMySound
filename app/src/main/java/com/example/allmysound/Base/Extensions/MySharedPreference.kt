@@ -1,4 +1,4 @@
-package com.example.allmysound.Main.Pref
+package com.example.allmysound.Base.Extensions
 
 import android.content.Context
 import android.content.SharedPreferences

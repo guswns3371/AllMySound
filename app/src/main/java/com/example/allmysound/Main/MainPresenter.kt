@@ -1,16 +1,21 @@
 package com.example.allmysound.Main
 
 import android.content.Context
+import android.content.Intent
 import android.media.MediaPlayer
 import android.util.Log
 import android.view.View
 import android.widget.SeekBar
+import androidx.core.content.ContextCompat
+import com.example.allmysound.Base.App.App.Companion.DATALIST
+import com.example.allmysound.Base.App.App.Companion.POSITON
 import com.example.allmysound.Base.BasicListFrag.BasicListAdapter
-import com.example.allmysound.Extensions.getPreference
+import com.example.allmysound.Base.Extensions.getPreference
+import com.example.allmysound.Base.Service.MusicService
 import com.example.allmysound.Main.Dialog.Adapter.CPlayListAdapter
 import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.Music.InfoPage.AlbumInfo.Adapter.AlbumInfoAdapter
-import com.example.allmysound.Music.InfoPage.ArtistInfo.AritstInfo.ArtistInfoAdapter
+import com.example.allmysound.Music.InfoPage.ArtistInfo.Adapter.ArtistInfoAdapter
 import com.example.allmysound.Music.SongList.Adapter.SongListAdapter
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import org.jaudiotagger.audio.AudioFileIO
@@ -31,23 +36,23 @@ class MainPresenter(private val context: Context): MainContract.Presenter {
     private var albumInfoAdapter :AlbumInfoAdapter? = null
     private var artistInfoAdapter :ArtistInfoAdapter? = null
 
-    private var songInfolist: ArrayList<SongInfo>? =null
-    private var numList: ArrayList<Int>? =  null
+    private var songInfoList: ArrayList<SongInfo>? =null
+    private var playQueueList: ArrayList<Int>? =  null
     var isNewState : Boolean = true
-    private var songlistIdx: Int =0
-    private var randomIdx: Int =-1
+    private var oriQueueNum: Int =0
+    private var ranQueueNum: Int =-1
     private var mp :  MediaPlayer = MediaPlayer()
 
-    override fun getSongList(): ArrayList<SongInfo> = songInfolist!!
+    override fun getSongList(): ArrayList<SongInfo> = songInfoList!!
 
     override fun LinkDataList(songInfolist: ArrayList<SongInfo>) {
-        this.songInfolist = songInfolist
+        this.songInfoList = songInfolist
     }
     override fun LinkAdapter(Adapter: Any) {
         when(Adapter){
             is SongListAdapter ->{
                 this.songListAdapter = Adapter
-                numList = getNumList()
+//                playQueueList = getQueueList()
             }
             is CPlayListAdapter ->{this.cplayListAdapter = Adapter}
             is AlbumInfoAdapter -> {this.albumInfoAdapter = Adapter}
@@ -58,35 +63,34 @@ class MainPresenter(private val context: Context): MainContract.Presenter {
     }
     /**SongListAdapter*/
     override fun SonglinkDataIndex(idx: Int) {
-        this.songlistIdx = idx
+        this.oriQueueNum = idx
         SaveLoadPrepareStart()
         isNewState= false
     }
     override fun SonglinkDataUpdateIndex(idx: Int) {
-        this.songlistIdx = idx
+        this.oriQueueNum = idx
     }
 
     /**CPlayListAdapter*/
     override fun PlaylistllinkDataIndex(randomIdx: Int) {
-        this.randomIdx = randomIdx
-        val numList = context.getPreference().getPlayListInt()!!
-        songlistIdx = numList[randomIdx]
+        this.ranQueueNum = randomIdx
+        val playList = context.getPreference().getPlayListInt()!!
+        this.oriQueueNum = playList[ranQueueNum]
         SaveLoadPrepareStart()
-        songListAdapter!!.notifyDataSetChanged()
     }
     override fun PlaylistllinkDataUpdateIndex(randomIdx: Int) {
-        this.randomIdx = randomIdx
+        this.ranQueueNum = randomIdx
     }
 
     /**AlbumInfoAdapter*/
     override fun AlbumlinkDataIndex(idx: Int) {
-        this.songlistIdx = idx
+        this.oriQueueNum = idx
         SaveLoadPrepareStart()
     }
 
     /**ArtistInfoAdapter*/
     override fun ArtistIlinkDataIndex(idx: Int) {
-        this.songlistIdx = idx
+        this.oriQueueNum = idx
         SaveLoadPrepareStart()
     }
 
@@ -103,12 +107,12 @@ class MainPresenter(private val context: Context): MainContract.Presenter {
         prepareMusic()
     }
     override fun saveData() {
-        context.getPreference().setIsPlayingInfo(songInfolist!![songlistIdx])
+        context.getPreference().setIsPlayingInfo(songInfoList!![oriQueueNum])
     }
     override fun getASongData() {
         val songInfo =  context.getPreference().getIsPlayingInfo()
         if (songInfo != null) {
-            this.songlistIdx = songInfo.orderNum
+            this.oriQueueNum = songInfo.orderNum
             view.setSongAlbum(songInfo.album)
             view.setSongArtist(songInfo.artist)
             view.setSongInnerTitle(songInfo.title)
@@ -126,13 +130,14 @@ class MainPresenter(private val context: Context): MainContract.Presenter {
             mp.setOnCompletionListener {
                 nextBtnClicked()
                 mp.reset()
-                mp.setDataSource(songInfolist!![songlistIdx++].file_path)
+                mp.setDataSource(songInfoList!![oriQueueNum++].file_path)
                 mp.prepare()
                 connMusicSeekbar()
                 mp.start()
-
-                notifyAdapters()
+//                connService(oriQueueNum)
+                notifyAllAdapters()
             }
+//            connService(oriQueueNum)
         }catch (e : Exception){
             Log.e("MediaPlayer Exception","$e")
             e.printStackTrace()
@@ -141,7 +146,7 @@ class MainPresenter(private val context: Context): MainContract.Presenter {
     override fun prepareMusic(){
         try {
             mp.reset()
-            mp.setDataSource(songInfolist!![songlistIdx].file_path)
+            mp.setDataSource(songInfoList!![oriQueueNum].file_path)
             mp.prepare()
             connMusicSeekbar() // mp.prepare() 이전에 위치하면 클남
             view.setMusicSeekBarListener(MusicSeekBarListener())
@@ -157,17 +162,17 @@ class MainPresenter(private val context: Context): MainContract.Presenter {
 
     private fun nextMusic(){
         view.setMusicSeekBarProgress(0)
-        val numList = context.getPreference().getPlayListInt()!!
+        val playList = context.getPreference().getPlayListInt()!!
         if(context.getPreference().getShuffleBoolean()){
-            randomIdx++
-            if(randomIdx == numList.size)
-                randomIdx =0
-            songlistIdx = numList[randomIdx]
+            ranQueueNum++
+            if(ranQueueNum == playList.size)
+                ranQueueNum =0
+            oriQueueNum = playList[ranQueueNum]
         }else{
-            randomIdx =-1
-            songlistIdx++
-            if(songlistIdx == songInfolist!!.size)
-                songlistIdx =0
+            ranQueueNum =-1
+            oriQueueNum++
+            if(oriQueueNum == songInfoList!!.size)
+                oriQueueNum =0
         }
         if(mp.isPlaying)
             SaveLoadPrepareStart()
@@ -176,17 +181,17 @@ class MainPresenter(private val context: Context): MainContract.Presenter {
         }
     }
     private fun prevMusic(){
-        val numList = context.getPreference().getPlayListInt()!!
+        val playList = context.getPreference().getPlayListInt()!!
         if(context.getPreference().getShuffleBoolean()){
-            randomIdx--
-            if(randomIdx<=-1)
-                randomIdx = numList.size-1
-            songlistIdx = numList[randomIdx]
+            ranQueueNum--
+            if(ranQueueNum<=-1)
+                ranQueueNum = playList.size-1
+            oriQueueNum = playList[ranQueueNum]
         }else{
-            randomIdx = -1
-            songlistIdx--
-            if(songlistIdx <0)
-                songlistIdx =songInfolist!!.size-1
+            ranQueueNum = -1
+            oriQueueNum--
+            if(oriQueueNum <0)
+                oriQueueNum =songInfoList!!.size-1
         }
         if(mp.isPlaying)
             SaveLoadPrepareStart()
@@ -194,10 +199,10 @@ class MainPresenter(private val context: Context): MainContract.Presenter {
             SaveLoadPrepare()
         }
     }
-    private fun getNumList() : ArrayList<Int>{
+    private fun getQueueList() : ArrayList<Int>{
         val numbers : ArrayList<Int> = ArrayList()
         val min = 0
-        val max = songInfolist!!.size-1
+        val max = songInfoList!!.size-1
         for(i in min..max) numbers.add(i)
 
         if(context.getPreference().getShuffleBoolean())
@@ -289,12 +294,12 @@ class MainPresenter(private val context: Context): MainContract.Presenter {
     override fun nextBtnClicked() {
         if(context.getPreference().getIsPlayingInfo() == null) return
         nextMusic()
-        notifyAdapters()
+        notifyAllAdapters()
     }
     override fun prevBtnClicked() {
         if(context.getPreference().getIsPlayingInfo() == null) return
         prevMusic()
-        notifyAdapters()
+        notifyAllAdapters()
     }
     override fun rotateBtnClicked() {
         if(context.getPreference().getRotateBoolean()){
@@ -355,7 +360,7 @@ class MainPresenter(private val context: Context): MainContract.Presenter {
         }
     }
 
-    private fun notifyAdapters(){
+    private fun notifyAllAdapters(){
         if(songListAdapter!=null)
             songListAdapter!!.notifyDataSetChanged()
         if(cplayListAdapter!=null)
@@ -369,13 +374,20 @@ class MainPresenter(private val context: Context): MainContract.Presenter {
     }
 
     fun setRandomIdxNumList(){
-            numList = getNumList()
-            randomIdx = numList!!.indexOf(context.getPreference().getIsPlayingInfo()!!.orderNum)
+            playQueueList = getQueueList()
+            ranQueueNum = playQueueList!!.indexOf(context.getPreference().getIsPlayingInfo()!!.orderNum)
     }
     private fun getLyrics(): String{
         val songInfo =  context.getPreference().getIsPlayingInfo()
         val mp3 = AudioFileIO.read(File(songInfo!!.file_path))
         val value = mp3.tag.getFirst(FieldKey.LYRICS)
         return String(value.toByteArray(StandardCharsets.UTF_8),StandardCharsets.UTF_8)
+    }
+
+    private fun connService(pos : Int){
+        val intent = Intent(context,MusicService::class.java)
+        intent.putParcelableArrayListExtra(DATALIST,songInfoList)
+        intent.putExtra(POSITON,pos)
+        ContextCompat.startForegroundService(context,intent)
     }
 }

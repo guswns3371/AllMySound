@@ -1,16 +1,13 @@
-package com.example.allmysound.Extensions
+package com.example.allmysound.Base.Extensions
 
 import android.app.Activity
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
-import androidx.fragment.app.Fragment
-import com.bumptech.glide.load.engine.prefill.PreFillType
 import com.bumptech.glide.util.Util.isOnMainThread
-import com.example.allmysound.Main.Pref.MySharedPreference
 
-fun Context.getPreference() : MySharedPreference{
+fun Context.getPreference() : MySharedPreference {
     return MySharedPreference(this)
 }
 

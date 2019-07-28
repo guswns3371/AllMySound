@@ -6,19 +6,17 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.allmysound.Extensions.getPreference
+import com.example.allmysound.Base.Extensions.getPreference
 import com.example.allmysound.Main.Dialog.Adapter.CPlayListAdapter
 import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.R
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.music_more_custom.*
-import java.util.*
 import kotlin.collections.ArrayList
 
 class MoreCustomDialog(context: Context) : Dialog(context) {

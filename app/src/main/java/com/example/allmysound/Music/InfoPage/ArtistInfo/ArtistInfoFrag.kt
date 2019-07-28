@@ -5,12 +5,11 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.allmysound.Main.MainActivity
 import com.example.allmysound.Main.Model.SongInfo
-import com.example.allmysound.Music.InfoPage.ArtistInfo.AritstInfo.ArtistInfoAdapter
+import com.example.allmysound.Music.InfoPage.ArtistInfo.Adapter.ArtistInfoAdapter
 import com.example.allmysound.R
 
 
@@ -42,8 +41,8 @@ class ArtistInfoFrag: Fragment() , ArtistContract.View{
         presenter.setView(this)
 
         val songinfo = getFragArgs()
-        val query = if(songinfo.albumArtist == "Unknown")  MediaStore.Audio.Media.ARTIST+"== '${songinfo.artist.replace("'","''")}'"
-        else " album_artist == '${songinfo.albumArtist.replace("'","''")}' "
+        val query =
+            MediaStore.Audio.Media.ARTIST+"== '${songinfo.artist.replace("'","''")}'"
         val orderBy =
                     MediaStore.Audio.AudioColumns.ALBUM + " ASC ,"+
                     MediaStore.Audio.AudioColumns.TRACK + " ASC"

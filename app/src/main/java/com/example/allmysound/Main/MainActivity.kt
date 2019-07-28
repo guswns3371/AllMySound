@@ -2,16 +2,17 @@ package com.example.allmysound.Main
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.Resources
+import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.media.AudioManager
 import android.os.Bundle
 import android.os.Handler
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.*
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.allmysound.Music.MusicFrag
 import com.example.allmysound.Recommend.RecommendFrag
@@ -21,14 +22,16 @@ import android.view.ViewGroup.MarginLayoutParams
 import androidx.appcompat.widget.Toolbar
 import kotlinx.android.synthetic.main.music_playing.*
 import android.widget.SeekBar
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
+import androidx.palette.graphics.Palette
 import com.eightbitlab.supportrenderscriptblur.SupportRenderScriptBlur
-import com.example.allmysound.Extensions.getPreference
-import com.example.allmysound.Extensions.showToast
+import com.example.allmysound.Base.Extensions.getPreference
+import com.example.allmysound.Base.Extensions.showToast
+import com.example.allmysound.Base.Service.MusicService
 import com.example.allmysound.Main.Dialog.MoreCustomDialog
 import com.example.allmysound.Main.Model.SongInfo
-import com.example.allmysound.Main.Pref.MySharedPreference
 import com.example.allmysound.Music.InfoPage.AlbumInfo.AlbumInfoFrag
 import com.example.allmysound.Music.InfoPage.ArtistInfo.ArtistInfoFrag
 import com.example.allmysound.R
@@ -36,6 +39,8 @@ import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import com.squareup.picasso.Picasso
+import com.squareup.picasso.Target
+import java.lang.Exception
 
 
 class MainActivity : AppCompatActivity(), MainContract.View {
@@ -51,12 +56,14 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
         blurry()
         Permission()
-        initPresenter()
+//        initPresenter()
+//        connectFragment(MusicFrag())
         setToolbar(main_toolbar)
-        connectFragment(MusicFrag())
         initVolumeControl()
         textviewScrolling()
         setClickListeners()
+        if(intent.getBooleanExtra("MusicService",false))
+            sliding_layout.panelState = SlidingUpPanelLayout.PanelState.EXPANDED
     }
 
     override fun setMusicSeekBarMax(max: Int) {
@@ -109,7 +116,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             visibilityLyrics(View.GONE)
             sliding_layout.isTouchEnabled = true
         }
-        song_album.setOnClickListener { }
+        song_album.setOnClickListener {}
         song_artist.setOnClickListener {goToArtistInfo()}
         more.setOnClickListener { presenter.moreBtnClicked() }
         play_pre.setOnClickListener { presenter.prevBtnClicked() ; sliding_layout.isTouchEnabled = true}
@@ -140,6 +147,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val permissionlistener = object : PermissionListener {
             override fun onPermissionGranted() {
                 Log.e("MainActivity_Permission", "Permission Granted")
+                initPresenter()
+                connectFragment(MusicFrag())
             }
 
             override fun onPermissionDenied(deniedPermissions: List<String>) {
@@ -212,8 +221,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             KeyEvent.KEYCODE_BACK -> {
                 Log.e("backStackEntryCount","${supportFragmentManager.backStackEntryCount}")
                 when {
-                    sliding_layout.panelState ==SlidingUpPanelLayout.PanelState.EXPANDED ->
+                    sliding_layout.panelState ==SlidingUpPanelLayout.PanelState.EXPANDED -> {
                         sliding_layout.panelState =SlidingUpPanelLayout.PanelState.COLLAPSED
+                        visibilityLyrics(View.GONE)
+                        sliding_layout.isTouchEnabled = true
+                    }
                     supportFragmentManager.backStackEntryCount >1 ->
                         supportFragmentManager.popBackStackImmediate()
                     supportFragmentManager.backStackEntryCount ==1 ->{

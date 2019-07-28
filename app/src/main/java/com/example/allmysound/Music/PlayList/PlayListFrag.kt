@@ -5,18 +5,16 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.allmysound.Base.BasicListFrag.BasicListFrag
 import com.example.allmysound.Main.Model.PlaylistInfo
-import com.example.allmysound.Main.Model.SongInfo
 import com.example.allmysound.Music.PlayList.Adapter.PlayListFragAdapter
 import com.example.allmysound.R
 import com.reddit.indicatorfastscroll.FastScrollerThumbView
 import com.reddit.indicatorfastscroll.FastScrollerView
 import kotlinx.android.synthetic.main.playlist_item_one.*
-import com.example.allmysound.Extensions.showToast
+import com.example.allmysound.Base.Extensions.showToast
 
 class PlayListFrag: Fragment(),PlayListContract.View {
 
